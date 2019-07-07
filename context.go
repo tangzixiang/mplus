@@ -274,6 +274,23 @@ func GetContextValueBool(ctx context.Context, key string, defaultValue ...bool) 
 }
 
 // GetContextValueBytes 获取上下文信息
+func GetContextValueByte(ctx context.Context, key string, defaultValue ...byte) byte {
+	value := GetContextValue(ctx, key)
+	rv, ok := value.(byte)
+
+	defaultRv := byte(0)
+	if len(defaultValue) > 0 {
+		defaultRv = defaultValue[0]
+	}
+
+	if value == nil || !ok {
+		return defaultRv
+	}
+
+	return rv
+}
+
+// GetContextValueBytes 获取上下文信息
 func GetContextValueBytes(ctx context.Context, key string, defaultValue ...[]byte) []byte {
 	value := GetContextValue(ctx, key)
 	rv, ok := value.([]byte)
@@ -296,6 +313,41 @@ func GetContextValueTime(ctx context.Context, key string, defaultValue ...time.T
 	rv, ok := value.(time.Time)
 
 	defaultRv := time.Time{}
+	if len(defaultValue) > 0 {
+		defaultRv = defaultValue[0]
+	}
+
+	if value == nil || !ok {
+		return defaultRv
+	}
+
+	return rv
+}
+
+
+// GetContextValueFloat32 获取上下文信息
+func GetContextValueFloat32(ctx context.Context, key string, defaultValue ...float32) float32 {
+	value := GetContextValue(ctx, key)
+	rv, ok := value.(float32)
+
+	defaultRv := float32(0)
+	if len(defaultValue) > 0 {
+		defaultRv = defaultValue[0]
+	}
+
+	if value == nil || !ok {
+		return defaultRv
+	}
+
+	return rv
+}
+
+// GetContextValueFloat64 获取上下文信息
+func GetContextValueFloat64(ctx context.Context, key string, defaultValue ...float64) float64 {
+	value := GetContextValue(ctx, key)
+	rv, ok := value.(float64)
+
+	defaultRv := float64(0)
 	if len(defaultValue) > 0 {
 		defaultRv = defaultValue[0]
 	}

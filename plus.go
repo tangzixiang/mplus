@@ -124,6 +124,115 @@ func (p *PP) Set(key string, value interface{}) *PP {
 	return p
 }
 
+// SetR 设置上下文内容,并返回原内容
+func (p *PP) SetR(key string, value interface{}) interface{} {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetStringR 设置上下文内容,并返回原内容
+func (p *PP) SetStringR(key string, value string) string {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetIntR 设置上下文内容,并返回原内容
+func (p *PP) SetIntR(key string, value int) int {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetInt8R 设置上下文内容,并返回原内容
+func (p *PP) SetInt8R(key string, value int8) int8 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetInt16R 设置上下文内容,并返回原内容
+func (p *PP) SetInt16R(key string, value int16) int16 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetInt32R 设置上下文内容,并返回原内容
+func (p *PP) SetInt32R(key string, value int32) int32 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetInt64R 设置上下文内容,并返回原内容
+func (p *PP) SetInt64R(key string, value int64) int64 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetUintR 设置上下文内容,并返回原内容
+func (p *PP) SetUintR(key string, value uint) uint {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetUint8R 设置上下文内容,并返回原内容
+func (p *PP) SetUint8R(key string, value uint8) uint8 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetUint16R 设置上下文内容,并返回原内容
+func (p *PP) SetUint16R(key string, value uint16) uint16 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetUint32R 设置上下文内容,并返回原内容
+func (p *PP) SetUint32R(key string, value uint32) uint32 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetUint64R 设置上下文内容,并返回原内容
+func (p *PP) SetUint64R(key string, value uint64) uint64 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetBoolR 设置上下文内容,并返回原内容
+func (p *PP) SetBoolR(key string, value bool) bool {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetByteR 设置上下文内容,并返回原内容
+func (p *PP) SetByteR(key string, value byte) byte {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetBytesR 设置上下文内容,并返回原内容
+func (p *PP) SetBytesR(key string, value []byte) []byte {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetTimeR 设置上下文内容,并返回原内容
+func (p *PP) SetTimeR(key string, value time.Time) time.Time {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+// SetFloat32R 设置上下文内容,并返回原内容
+func (p *PP) SetFloat32R(key string, value float32) float32 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
+
+// SetFloat64R 设置上下文内容,并返回原内容
+func (p *PP) SetFloat64R(key string, value float64) float64 {
+	SetContextValue(p.r.Context(), key, value)
+	return value
+}
+
 // GetString 获取 string 类型的上下文内容，获取失败返回其零值
 func (p *PP) GetString(key string) string {
 	return GetContextValueString(p.r.Context(), key)
@@ -184,6 +293,11 @@ func (p *PP) GetBool(key string) bool {
 	return GetContextValueBool(p.r.Context(), key)
 }
 
+// GetByte 获取 byte 类型的上下文内容，获取失败返回其零值
+func (p *PP) GetByte(key string) byte {
+	return GetContextValueByte(p.r.Context(), key)
+}
+
 // GetBytes 获取 []byte 类型的上下文内容，获取失败返回其零值
 func (p *PP) GetBytes(key string) []byte {
 	return GetContextValueBytes(p.r.Context(), key)
@@ -192,6 +306,16 @@ func (p *PP) GetBytes(key string) []byte {
 // GetTime 获取 time.Time 类型的上下文内容，获取失败返回其零值
 func (p *PP) GetTime(key string) time.Time {
 	return GetContextValueTime(p.r.Context(), key)
+}
+
+// GetUInt32 获取 float32 类型的上下文内容，获取失败返回其零值
+func (p *PP) GetFloat32(key string) float32 {
+	return GetContextValueFloat32(p.r.Context(), key)
+}
+
+// GetFloat64 获取 float64 类型的上下文内容，获取失败返回其零值
+func (p *PP) GetFloat64(key string) float64 {
+	return GetContextValueFloat64(p.r.Context(), key)
 }
 
 // GetStringDf 获取 string 类型的上下文内容，获取失败返回默认值
@@ -254,14 +378,29 @@ func (p *PP) GetBoolDf(key string, defaultValue bool) bool {
 	return GetContextValueBool(p.r.Context(), key, defaultValue)
 }
 
+// GetByteDf 获取 byte 类型的上下文内容，获取失败返回默认值
+func (p *PP) GetByteDf(key string, defaultValue byte) byte {
+	return GetContextValueByte(p.r.Context(), key, defaultValue)
+}
+
 // GetBytesDf 获取 []byte 类型的上下文内容，获取失败返回默认值
 func (p *PP) GetBytesDf(key string, defaultValue []byte) []byte {
 	return GetContextValueBytes(p.r.Context(), key, defaultValue)
 }
 
-// GetTimeDf 获取 time.Time 类型的上下文内容，获取失败返回其零值
+// GetTimeDf 获取 time.Time 类型的上下文内容，获取失败返回默认值
 func (p *PP) GetTimeDf(key string, defaultValue time.Time) time.Time {
 	return GetContextValueTime(p.r.Context(), key, defaultValue)
+}
+
+// GetUInt32 获取 float32 类型的上下文内容，获取失败返回默认值
+func (p *PP) GetFloat32Df(key string, defaultValue float32) float32 {
+	return GetContextValueFloat32(p.r.Context(), key, defaultValue)
+}
+
+// GetFloat64 获取 float64 类型的上下文内容，获取失败返回默认值
+func (p *PP) GetFloat64Df(key string, defaultValue float64) float64 {
+	return GetContextValueFloat64(p.r.Context(), key, defaultValue)
 }
 
 // DoCallback 查询指定错误嘛注册的回调并执行
@@ -300,7 +439,7 @@ func (p *PP) Query(key string) (value string) {
 	return values[0]
 }
 
-// GetQuery 获取 URL 上的指定的请求字段
+// GetQuery 获取 URL 上的指定的请求字段，获取失败返回默认值
 func (p *PP) GetQueryDf(key, defaultValue string) (value string) {
 	values, exists := Queries(p.r)[key]
 	if !exists || len(values) <= 0 {
@@ -313,6 +452,15 @@ func (p *PP) GetQueryDf(key, defaultValue string) (value string) {
 // GetHeader 获取指定请求头信息
 func (p *PP) GetHeader(key string) string {
 	return GetHeader(p.r, key)
+}
+
+// GetHeaderDf 获取指定请求头信息，获取失败返回默认值
+func (p *PP) GetHeaderDf(key string, defaultValue string) string {
+	value := GetHeader(p.r, key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }
 
 // SplitHeader 分割指定请求头内容
