@@ -1,6 +1,7 @@
 package mplus
 
 import (
+	"encoding/json"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -225,7 +226,6 @@ func (p *PP) SetFloat32R(key string, value float32) float32 {
 	SetContextValue(p.r.Context(), key, value)
 	return value
 }
-
 
 // SetFloat64R 设置上下文内容,并返回原内容
 func (p *PP) SetFloat64R(key string, value float64) float64 {
@@ -468,14 +468,14 @@ func (p *PP) SplitHeader(key string) [] string {
 	return SplitHeader(p.r, key)
 }
 
-// WriteHeader 将指定头信息写入到响应中
-func (p *PP) WriteHeader(key, value string) *PP {
+// WriteRespHeader 将指定头信息写入到响应中
+func (p *PP) WriteRespHeader(key, value string) *PP {
 	SetResponseHeader(p.w, key, value)
 	return p
 }
 
-// WriteHeader 将指定头信息写入到响应中
-func (p *PP) WriteHeaders(headers map[string]string) *PP {
+// WriteRespHeaders 将指定头信息写入到响应中
+func (p *PP) WriteRespHeaders(headers map[string]string) *PP {
 	SetResponseHeaders(p.w, headers)
 	return p
 }
@@ -546,4 +546,22 @@ func (p *PP) GetClientIP() string {
 // ReqBody 读取 p.r 的 body 内容并保持 p.r.Body 可持续使用
 func (p *PP) ReqBody() string {
 	return DumpRequest(p.r)
+}
+
+// ReqBody 读取 p.r 的 body 内容并保持 p.r.Body 可持续使用
+func (p *PP) ReqBodyPure() []byte {
+	return DumpRequestPure(p.r)
+}
+
+// ReqBodyMap 读取 p.r 的 body 内容并保持 p.r.Body 可持续使用,body 内容会被序列化成 map[string] interface{}
+func (p *PP) ReqBodyMap() (map[string]interface{}, error) {
+	body := DumpRequestPure(p.r)
+	m := map[string]interface{}{}
+
+	return m, json.Unmarshal(body, &m)
+}
+
+// ReqBodyMap 读取 p.r 的 body 内容并保持 p.r.Body 可持续使用,body 内容会被序列化至 unmarshaler
+func (p *PP) ReqBodyToUnmarshaler(unmarshaler json.Unmarshaler) (error) {
+	return unmarshaler.UnmarshalJSON(DumpRequestPure(p.r))
 }

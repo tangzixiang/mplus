@@ -84,8 +84,8 @@ var validateErrorHub = map[ValidateErrorType]ValidateErrorFunc{}
 
 // 默认解析错误处理器
 var defaultValidateErrorHub = map[ValidateErrorType]http.HandlerFunc{
-	ErrBodyRead:        InternalServerError,
-	ErrBodyUnmarshal:   InternalServerError,
+	ErrBodyRead:        BadRequest,
+	ErrBodyUnmarshal:   BadRequest,
 	ErrMediaType:       UnsupportedMediaType,
 	ErrMediaTypeParse:  UnsupportedMediaType,
 	ErrBodyParse:       BadRequest,

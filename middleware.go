@@ -3,6 +3,7 @@ package mplus
 import (
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/pkg/errors"
 )
@@ -32,32 +33,40 @@ func Thunk(handlers ...http.Handler) http.HandlerFunc {
 //
 // 第三步 校验失败则终止请求链，校验成功则将 VO 对象放入 request context
 //
-// example: Check(schema.DeviceLoginValidate{})
+// example: Check((*schema.DeviceLoginValidate)(nil))
 func Bind(validateData interface{}) http.HandlerFunc {
+
+	// 入参只允许指针及函数类型
+	checkBindType(validateData)
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
+		var vo interface{}
 
-		if validateData == nil {
-			fmt.Println("[muxplus] validate object can't be nil")
-			InternalServerError(w, r)
-			return
-		}
-
-		if validateData, err = checkValidateData(w, r, validateData); err != nil {
-			fmt.Printf("[muxplus] get validate object failed : %v\n", err)
+		// 得到一个全新的 VO 的对象
+		if vo, err = checkValidateData(w, r, validateData); err != nil {
+			fmt.Printf("[muxplus] [request:%v] get validate object failed : %v\n", GetHeaderRequestID(r), err)
 			dealValidateResultErr(w, r, err)
 			return
 		}
 
-		vr := ParseValidate(r, &validateData)
+		vr := ParseValidate(r, vo)
 		if vr.Err != nil {
-			fmt.Printf("[muxplus] parse validate object failed: %v\n", err)
+			fmt.Printf("[muxplus] [request:%v] parse validate object failed: %v\n", GetHeaderRequestID(r), vr.Err)
 			dealValidateResultErr(w, r, vr.Err)
 			return
 		}
 
 		SetContextValue(r.Context(), BodyData, vr.BodyBytes)
-		SetContextValue(r.Context(), ReqData, validateData)
+		SetContextValue(r.Context(), ReqData, vo)
+	}
+}
+
+func checkBindType(validateData interface{}) {
+	vType := reflect.TypeOf(validateData)
+
+	if vType.Kind() != reflect.Ptr && vType.Kind() != reflect.Func {
+		panic(errors.New("[muxplus] bind data must be ptr or func"))
 	}
 }
 
@@ -68,8 +77,11 @@ func checkValidateData(w http.ResponseWriter, r *http.Request, validateData inte
 		if validateData, err = voType(r); err != nil {
 			return nil, err
 		}
-	default:
-		// do nothing
+	default: // ptr
+		return reflect.New( // new vo
+			reflect.TypeOf(validateData). // get type ptr
+				Elem(), // get type
+		).Interface(), nil
 	}
 	return validateData, nil
 }

@@ -20,6 +20,7 @@ type ResponseWriter interface {
 	SetStatus(status int)
 	Status() int
 
+	WriteHead(int)
 	ReaderFrom(src io.Reader) (n int64, err error)
 }
 
@@ -29,17 +30,16 @@ var (
 )
 
 func (w *responseWrite) SetStatus(status int) {
-	w.WriteHeader(status)
+	w.status = status
 }
 
 func (w *responseWrite) Status() int {
 	return w.status
 }
 
-// WriteHeader 设置响应头
-func (w *responseWrite) WriteHeader(status int) {
-	w.status = status
-	w.ResponseWriter.WriteHeader(status)
+func (w *responseWrite) WriteHead(code int) {
+	w.SetStatus(code)
+	w.ResponseWriter.WriteHeader(code)
 }
 
 // ReaderFrom 将指定流写入响应内
@@ -61,9 +61,25 @@ func GetHTTPRespStatus(w http.ResponseWriter) int {
 	return http.StatusOK
 }
 
-// SetHTTPRespStatus 设置响应状态, w 应该是 responseWrite 实例
-func SetHTTPRespStatus(w http.ResponseWriter, status int) http.ResponseWriter {
-	w.WriteHeader(status)
+// SetHTTPRespStatus 设置响应状态, w 应该是 responseWrite 实例, coverSupper 决定是否覆盖到底层的 http.ResponseWriter
+func SetHTTPRespStatus(w http.ResponseWriter, status int, coverSupper ... bool) http.ResponseWriter {
+
+	cover := true
+	if len(coverSupper) > 0 && !coverSupper[0] {
+		cover = false
+	}
+	rw, ok := w.(ResponseWriter)
+
+	if ! ok {
+		w.WriteHeader(status)
+		return w
+	}
+
+	if cover {
+		rw.WriteHead(status)
+	} else {
+		rw.SetStatus(status)
+	}
 	return w
 }
 

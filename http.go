@@ -30,7 +30,7 @@ func IsAbort(r *http.Request) bool {
 
 // Error 返回异常信息，当前方法触发的请求响应内容将是文本格式
 func Error(w http.ResponseWriter, message Message) {
-	http.Error(SetHTTPRespStatus(w, message.Status()), message.Default(), message.Status())
+	http.Error(SetHTTPRespStatus(w, message.Status(), false), message.Default(), message.Status())
 }
 
 // AbortError 终止请求链并返回异常信息，当前方法触发的请求响应内容将是文本格式
@@ -99,19 +99,20 @@ func JSON(w http.ResponseWriter, r *http.Request, data interface{}, status int) 
 func DumpRequest(r *http.Request) string {
 
 	body, _ := ioutil.ReadAll(r.Body)
+
 	// Reset resp.Body so it can be use again
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
 	return string(body)
 }
 
-// DumpResponse 读取 w 的 body 内容并保持 w.Body 可持续使用
-// 一般用于完成一次请求并读取 body 数据后，保证后续代码可再次通过 w.Body 读取数据
-func DumpResponse(w *http.Response) string {
+// DumpRequestPure 读取 r 的 body 内容并保持 r.Body 可持续使用
+// 一般用于请求 handler 中读取 body 数据后，并保证后续代码可再次通过 r.Body 读取数据
+func DumpRequestPure(r *http.Request) []byte {
 
-	body, _ := ioutil.ReadAll(w.Body)
+	body, _ := ioutil.ReadAll(r.Body)
 	// Reset resp.Body so it can be use again
-	w.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
-	return string(body)
+	return body
 }

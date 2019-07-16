@@ -9,6 +9,7 @@ import (
 // 请求头常量
 const (
 	RequestIDHeader           = "X-Request-Id" // 当前请求的 request-id
+	ContentTypeHeader         = "Content-Type"
 	ForwardedForHeader        = "X-Forwarded-For"
 	RealIPHeader              = "X-Real-Ip"
 	AppEngineRemoteAddrHeader = "X-Appengine-Remote-Addr"
@@ -44,6 +45,11 @@ func SetRequestHeaders(r *http.Request, headers map[string]string) *http.Request
 		r.Header.Set(key, value)
 	}
 	return r
+}
+
+// GetResponseHeader 获取指定请求头
+func GetResponseHeader(w http.ResponseWriter, header string) string {
+	return w.Header().Get(header)
 }
 
 // SetResponseHeader 将指定请求头添加到响应中
@@ -96,8 +102,9 @@ func GetClientIP(r *http.Request) string {
 }
 
 const (
-	ContentTypeJSON = "application/json"
-	ContentTypeForm = "application/x-www-form-urlencoded"
-	ContentTypeText = "text/plain"
-	ContentTypeXML  = "application/xml"
+	ContentTypeJSON   = "application/json"
+	ContentTypeForm   = "application/x-www-form-urlencoded"
+	ContentTypeText   = "text/plain"
+	ContentTypeXML    = "application/xml"
+	ContentTypeStream = "application/octet-stream"
 )

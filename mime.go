@@ -31,8 +31,13 @@ func ParseMediaType(r *http.Request) (string, error) {
 
 	// RFC 7231, section 3.1.1.5 - empty type
 	//   MAY be treated as application/octet-stream
+	// if ct == "" {
+	// 	ct = MIMEStream
+	// }
+
+	// 允许 post 请求不带请求体
 	if ct == "" {
-		ct = MIMEStream
+		ct = MIMEPOSTForm
 	}
 
 	ct, _, err = mime.ParseMediaType(ct)

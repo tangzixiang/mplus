@@ -2,10 +2,10 @@ package mplus
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/pkg/errors"
 
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -84,10 +84,14 @@ func parse(r *http.Request, obj interface{}, vr *ValidateResult) {
 
 	if r.PostForm != nil {
 		vr.BodyValues = r.PostForm
+	} else {
+		vr.BodyValues = url.Values{}
 	}
 
 	if r.Form != nil {
 		vr.QueryValues = r.Form
+	} else {
+		vr.QueryValues = url.Values{}
 	}
 
 	// parse url query
@@ -105,27 +109,31 @@ func parsePost(r *http.Request, obj interface{}, vr *ValidateResult) {
 			vr.Err = ValidateErrorWrap(err, ErrBodyParse)
 		}
 	case MIMEJSON:
-		body, err := ioutil.ReadAll(r.Body)
-		if err == nil {
+		body := DumpRequestPure(r)
+		if len(body) != 0 {
 			vr.BodyBytes = body
 			if err := json.Unmarshal(body, obj); err != nil {
 				vr.Err = ValidateErrorWrap(err, ErrBodyUnmarshal)
 			}
 		} else {
-			vr.Err = ValidateErrorWrap(err, ErrBodyRead)
+			vr.Err = ValidateErrorWrap(errors.New("body empty"), ErrBodyRead)
 		}
 	default:
-		vr.Err = ValidateErrorWrap(errors.New("mediaType not support "), ErrMediaType)
+		vr.Err = ValidateErrorWrap(errors.New("mediaType not support"), ErrMediaType)
 	}
 }
 
 // 解析 URL ,并将 URL 参数解析到指定对象
 func parseQueryDecode(r *http.Request, obj interface{}, vr *ValidateResult) {
-	var err error
+	parseQuery, err := ParseQuery(r)
 
-	if vr.QueryValues, err = ParseQuery(r); err != nil {
+	if err != nil {
 		vr.Err = ValidateErrorWrap(err, ErrParseQuery)
 		return
+	}
+
+	if parseQuery != nil && len(parseQuery) > 0 {
+		vr.QueryValues = NewQueryWith(vr.QueryValues).With(parseQuery).v
 	}
 
 	if err := DecodeForm(obj, vr.QueryValues); err != nil {
@@ -142,19 +150,19 @@ const (
 
 // ValidatorStandErrMsg 构建请求错误提示信息
 func ValidatorStandErrMsg(err error) string {
-	rv := err.Error()
 
 	vErr, ok := err.(validator.ValidationErrors)
 	if !ok {
-		return rv
+		return err.Error()
 	}
 
+	buildRv := ""
 	for i, e := range vErr {
 		if i != 0 {
-			rv += sep
+			buildRv += sep
 		}
-		rv += e.Namespace() + failedMsg + quo + e.Tag() + quo
+		buildRv += e.Namespace() + failedMsg + quo + e.Tag() + quo
 	}
 
-	return rv
+	return buildRv
 }
