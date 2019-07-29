@@ -3,6 +3,7 @@ package mplus
 import (
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // Queries 获取 URL 上的请求字段
@@ -158,4 +159,14 @@ func (q *Query) ParseForm(query string) *Query {
 	}
 
 	return q.With(values)
+}
+
+// AppendTo 将请求字段追加至 URI 上
+func (q *Query) AppendToURI(uri string) string {
+
+	if strings.LastIndex(uri, "?") == 0 {
+		return uri + q.Encode()
+	}
+
+	return uri + "?" + q.Encode()
 }

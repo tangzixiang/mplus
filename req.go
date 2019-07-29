@@ -1,6 +1,8 @@
 package mplus
 
 import (
+	"bytes"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -63,6 +65,12 @@ func CopyRequest(r *http.Request) *http.Request {
 		newURL := *r.URL
 		r2.URL = &newURL
 	}
+
+	body, _ := ioutil.ReadAll(r.Body)
+
+	// Reset resp.Body so it can be use again
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	r2.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
 	return r2.WithContext(CopyContext(r.Context()))
 }

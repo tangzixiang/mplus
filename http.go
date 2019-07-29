@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"sync"
 )
 
 const (
@@ -39,9 +40,17 @@ func AbortError(w http.ResponseWriter, r *http.Request, message Message) {
 	Error(w, message)
 }
 
-// InternalServerError 系统内部错误
+// InternalServerError 500 系统内部错误
 func InternalServerError(w http.ResponseWriter, r *http.Request) {
-	AbortError(w, r, MessageStatusInternalServerError)
+
+	registerFunc, exists := httpStatusMethodHub[http.StatusInternalServerError]
+
+	if !exists {
+		AbortError(w, r, MessageStatusInternalServerError)
+		return
+	}
+
+	registerFunc(w, Abort(r), MessageStatusInternalServerError, http.StatusInternalServerError)
 }
 
 // Redirect 重定向
@@ -51,29 +60,69 @@ func Redirect(w http.ResponseWriter, r *http.Request, url string, code int) {
 	http.Redirect(w, Abort(r), url, code)
 }
 
-// Forbidden 拒绝服务
+// Forbidden 403 拒绝服务
 func Forbidden(w http.ResponseWriter, r *http.Request) {
-	AbortError(w, r, MessageStatusForbidden)
+
+	registerFunc, exists := httpStatusMethodHub[http.StatusForbidden]
+
+	if !exists {
+		AbortError(w, r, MessageStatusForbidden)
+		return
+	}
+
+	registerFunc(w, Abort(r), MessageStatusForbidden, http.StatusForbidden)
 }
 
-// NotFound 资源不存在
+// NotFound 404 资源不存在
 func NotFound(w http.ResponseWriter, r *http.Request) {
-	AbortError(w, r, MessageStatusNotFound)
+
+	registerFunc, exists := httpStatusMethodHub[http.StatusNotFound]
+
+	if !exists {
+		AbortError(w, r, MessageStatusNotFound)
+		return
+	}
+
+	registerFunc(w, Abort(r), MessageStatusNotFound, http.StatusNotFound)
 }
 
-// Unauthorized 未认证
+// Unauthorized 401 未认证
 func Unauthorized(w http.ResponseWriter, r *http.Request) {
-	AbortError(w, r, MessageStatusUnauthorized)
+
+	registerFunc, exists := httpStatusMethodHub[http.StatusUnauthorized]
+
+	if !exists {
+		AbortError(w, r, MessageStatusUnauthorized)
+		return
+	}
+
+	registerFunc(w, Abort(r), MessageStatusUnauthorized, http.StatusUnauthorized)
 }
 
-// BadRequest 请求异常
+// BadRequest 400 请求异常
 func BadRequest(w http.ResponseWriter, r *http.Request) {
-	AbortError(w, r, MessageStatusBadRequest)
+
+	registerFunc, exists := httpStatusMethodHub[http.StatusBadRequest]
+
+	if !exists {
+		AbortError(w, r, MessageStatusBadRequest)
+		return
+	}
+
+	registerFunc(w, Abort(r), MessageStatusBadRequest, http.StatusBadRequest)
 }
 
-// UnsupportedMediaType 不支持的媒体类型
+// UnsupportedMediaType 415 不支持的媒体类型
 func UnsupportedMediaType(w http.ResponseWriter, r *http.Request) {
-	AbortError(w, r, MessageUnsupportedMediaType)
+
+	registerFunc, exists := httpStatusMethodHub[http.StatusUnsupportedMediaType]
+
+	if !exists {
+		AbortError(w, r, MessageUnsupportedMediaType)
+		return
+	}
+
+	registerFunc(w, Abort(r), MessageUnsupportedMediaType, http.StatusUnsupportedMediaType)
 }
 
 // JSON 正常响应 JSON 请求
@@ -115,4 +164,18 @@ func DumpRequestPure(r *http.Request) []byte {
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
 	return body
+}
+
+type StatusMethodCallback func(w http.ResponseWriter, r *http.Request, message Message, code int)
+
+var (
+	httpStatusMethodHubLock sync.Mutex
+	httpStatusMethodHub     = map[int]StatusMethodCallback{}
+)
+
+// RegisterHttpStatusMethod 注册默认的请求状态回调
+func RegisterHttpStatusMethod(code int, f StatusMethodCallback) {
+	httpStatusMethodHubLock.Lock()
+	httpStatusMethodHub[code] = f
+	httpStatusMethodHubLock.Unlock()
 }

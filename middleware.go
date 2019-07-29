@@ -33,7 +33,8 @@ func Thunk(handlers ...http.Handler) http.HandlerFunc {
 //
 // 第三步 校验失败则终止请求链，校验成功则将 VO 对象放入 request context
 //
-// example: Check((*schema.DeviceLoginValidate)(nil))
+// example: Bind((*VO)(nil))
+//
 func Bind(validateData interface{}) http.HandlerFunc {
 
 	// 入参只允许指针及函数类型
@@ -71,19 +72,23 @@ func checkBindType(validateData interface{}) {
 }
 
 func checkValidateData(w http.ResponseWriter, r *http.Request, validateData interface{}) (interface{}, error) {
-	switch voType := validateData.(type) {
-	case ValidateFunc:
+
+	// 如果是函数则获取函数返回的值,返回值只能是指针
+	if voTypeFunc, ok := validateData.(ValidateFunc); ok {
 		var err error
-		if validateData, err = voType(r); err != nil {
+		if validateData, err = voTypeFunc(r); err != nil {
 			return nil, err
 		}
-	default: // ptr
-		return reflect.New( // new vo
-			reflect.TypeOf(validateData). // get type ptr
-				Elem(), // get type
-		).Interface(), nil
+
+		if reflect.TypeOf(validateData).Kind() != reflect.Ptr {
+			return nil, errors.New("[muxplus] bind data must be ptr or func")
+		}
 	}
-	return validateData, nil
+
+	return reflect.New( // new vo
+		reflect.TypeOf(validateData). // get type ptr
+			Elem(), // get type
+	).Interface(), nil
 }
 
 func dealValidateResultErr(w http.ResponseWriter, r *http.Request, err error) {

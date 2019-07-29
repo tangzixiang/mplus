@@ -167,15 +167,15 @@ var (
 )
 
 // Add 添加指定 Message
-func (ms *messages) Add(msg Message) {
+func (ms messages) Add(msg Message) {
 	lock.Lock()
-	(*ms)[msg.ErrCode()] = msg
+	ms[msg.ErrCode()] = msg
 	lock.Unlock()
 }
 
 // Get 获取指定 Message
-func (ms *messages) Get(errCode int) Message {
-	return (*ms)[errCode]
+func (ms messages) Get(errCode int) Message {
+	return ms[errCode]
 }
 
 // SetDefaultLang 设置当前项目默认的语言
