@@ -1,4 +1,4 @@
-module mplus
+module github.com/tangzixiang/mplus
 
 go 1.12
 
