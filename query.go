@@ -164,7 +164,7 @@ func (q *Query) ParseForm(query string) *Query {
 // AppendTo 将请求字段追加至 URI 上
 func (q *Query) AppendToURI(uri string) string {
 
-	if strings.LastIndex(uri, "?") == 0 {
+	if strings.Index(uri, "?")  != -1 {
 		return uri + q.Encode()
 	}
 

@@ -27,3 +27,20 @@ func TestQuery_Encode(t *testing.T) {
 	}
 
 }
+
+func TestQuery_AppendToURI(t *testing.T) {
+
+	urlValues := make(url.Values)
+	urlValues.Add("name", "tom")
+	urlValues.Add("age", "15")
+	path := "http://localhost?" + urlValues.Encode()
+
+	if !assert.Equal(t, path, NewQuery().Add("name", "tom").Add("age", "15").AppendToURI("http://localhost?")) {
+		return
+	}
+
+	if !assert.Equal(t, path, NewQuery().AddPairs("name", "tom", "age", "15").AppendToURI("http://localhost")) {
+		return
+	}
+
+}
