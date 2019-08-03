@@ -13,10 +13,16 @@ const (
 	responseStatus  = "__status"
 )
 
-const defaultMemory = 32 * 1024 * 1024
+// use for http.Request.ParseMultipartForm, unit is bytes
+var defaultMemory = int64(32 * 1024 * 1024)
 
 // EmptyRespData 空响应体
 var EmptyRespData = map[string]interface{}{}
+
+// SetDefaultMemorySize 设置 http.Request.ParseMultipartForm 参数 maxMemory
+func SetDefaultMemorySize(size int64) {
+	defaultMemory = size
+}
 
 // Abort 标识当前请求链已中断
 func Abort(r *http.Request) *http.Request {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -105,6 +106,44 @@ func TestParseValidateErrMediaType(t *testing.T) {
 	}
 
 	if !assert.Equal(t, ErrMediaType, errors.Cause(vr.Err).(ValidateError).Type()) {
+		return
+	}
+}
+
+func TestValidatorStandErrMsg(t *testing.T) {
+
+	// parse body failed
+	RegisterValidateErrorFunc(ErrBodyValidate, func(w http.ResponseWriter, r *http.Request, err error) {
+		Abort(r)
+
+		cErr, ok := err.(ValidateError)
+		if !assert.True(t, ok) {
+			return
+		}
+
+		w.Write([]byte(cErr.Error()))
+	})
+
+	recorder := httptest.NewRecorder()
+	// wrap the ResponseWriter
+	w := NewResponseWrite(http.ResponseWriter(recorder))
+
+	r := SetRequestHeader(
+		httptest.NewRequest(http.MethodPost, "http://127.0.0.1", strings.NewReader("{}")),
+		ContentType, MIMEJSON) // set parse by json
+
+	// init context
+	r = r.WithContext(NewContext(r.Context()))
+
+	type body struct {
+		Size int `validate:"required"`
+	}
+
+	// 主动触发
+	Bind((*body)(nil)).ServeHTTP(w, r)
+
+	errMsg := "Key: 'body.Size' Error:Field validation for 'Size' failed on the 'required' tag"
+	if !assert.Equal(t, errMsg, recorder.Body.String()) {
 		return
 	}
 }

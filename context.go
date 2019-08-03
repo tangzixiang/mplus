@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//  上下文 KEY 用于在请求的 Context 中构造独立的上下文空间
+//  上下文 KEY 类型，用于在请求的 Context 中构造独立的上下文空间
 type contextKey int
 
 // Context 请求上下文，用于在请求链上传递相关信息

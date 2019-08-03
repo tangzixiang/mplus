@@ -56,7 +56,7 @@ func (ve ValidateError) LastErr() error {
 	return ve.lastErr
 }
 
-// Error 等效于  ve.LastErr().Error()
+// Error 等效于 ve.LastErr().Error()
 func (ve ValidateError) Error() string {
 	return ve.lastErr.Error()
 }

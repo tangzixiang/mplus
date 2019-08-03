@@ -10,12 +10,12 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// RequestValidate 实现该接口的不同的请求结构体可以自校验
+// RequestValidate 实现该接口的不同VO(请求结构体)可以自校验
 type RequestValidate interface {
-	Validate(r *http.Request) (ok bool, errMsg string)
+	Validate(r *http.Request) (ok bool /*校验是否成功*/, errMsg string /*校验失败的原因*/)
 }
 
-// ValidateFunc 自定义当前请求需要用到的 VO 对象
+// ValidateFunc 自定义当前请求需要用到的 VO 对象，用于
 // 返回的 VO 不应该为 nil，若无法返回正确的 VO 应该在返回的 error 中进行说明
 type ValidateFunc func(r *http.Request) (interface{}, error)
 
@@ -71,7 +71,7 @@ func parse(r *http.Request, obj interface{}, vr *ValidateResult) {
 	}
 
 	switch r.Method {
-	case http.MethodPost, http.MethodPut, http.MethodPatch:
+	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete /*delete 请求可以有主体 https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE */ : // 考虑做成动态的
 		parsePost(r, obj, vr)
 	default:
 		// GET DELETE HEAD OPTION

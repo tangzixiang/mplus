@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-// todo 支持托管 w，r
-
 // PP 缓存了当前请求的 w ResponseWriter 及 r Request
 type PP struct {
 	w http.ResponseWriter

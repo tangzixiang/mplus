@@ -61,13 +61,14 @@ func GetHTTPRespStatus(w http.ResponseWriter) int {
 	return http.StatusOK
 }
 
-// SetHTTPRespStatus 设置响应状态, w 应该是 responseWrite 实例, coverSupper 决定是否覆盖到底层的 http.ResponseWriter
+// SetHTTPRespStatus 设置响应状态, w 应该是 responseWrite 实例, coverSupper 决定是否覆盖到底层的 http.ResponseWriter,默认 true
 func SetHTTPRespStatus(w http.ResponseWriter, status int, coverSupper ... bool) http.ResponseWriter {
 
 	cover := true
 	if len(coverSupper) > 0 && !coverSupper[0] {
 		cover = false
 	}
+
 	rw, ok := w.(ResponseWriter)
 
 	if ! ok {
