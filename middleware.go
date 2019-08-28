@@ -52,13 +52,17 @@ func Bind(validateData interface{}) http.HandlerFunc {
 		}
 
 		vr := ParseValidate(r, vo)
+
+		if len(vr.BodyBytes) != 0 { // 放这里是因为有可能序列化失败但是 body 读取成功，可以供后续使用
+			SetContextValue(r.Context(), BodyData, vr.BodyBytes)
+		}
+
 		if vr.Err != nil {
 			fmt.Printf("[muxplus] [request:%v] parse validate object failed: %v\n", GetHeaderRequestID(r), vr.Err)
 			dealValidateResultErr(w, r, vr.Err)
 			return
 		}
 
-		SetContextValue(r.Context(), BodyData, vr.BodyBytes)
 		SetContextValue(r.Context(), ReqData, vo)
 	}
 }
