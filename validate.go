@@ -33,33 +33,27 @@ var (
 	Validate = validator.New()
 )
 
-// ParseValidate 解析请求并将数据注入到指定对象，返回解析结果
-func ParseValidate(r *http.Request, obj interface{}) ValidateResult {
-	var vr ValidateResult
-
-	// 1. 解析
-	if parse(r, obj, &vr); vr.Err != nil {
-		return vr
-	}
+// bindValidate 解析请求并将数据注入到指定对象，返回解析结果
+func bindValidate(r *http.Request, obj interface{},vr *ValidateResult) {
 
 	// 2. tag 规则校验
 	if err := Validate.Struct(obj); err != nil {
 		vr.Err = ValidateErrorWrap(err, ErrBodyValidate)
-		return vr
+		return
 	}
 
 	// 3. 自定义校验
 	if v, hasValidateMethod := obj.(RequestValidate); hasValidateMethod {
 		if ok, errMsg := v.Validate(r); !ok {
 			vr.Err = ValidateErrorWrap(errors.New(errMsg), ErrRequestValidate)
-			return vr
+			return
 		}
 	}
 
-	return vr
+	return
 }
 
-func parse(r *http.Request, obj interface{}, vr *ValidateResult) {
+func parse(r *http.Request,vr *ValidateResult) {
 
 	var err error
 
@@ -72,7 +66,25 @@ func parse(r *http.Request, obj interface{}, vr *ValidateResult) {
 
 	switch r.Method {
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete /*delete 请求可以有主体 https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE */ : // 考虑做成动态的
-		parsePost(r, obj, vr)
+		switch vr.MediaType {
+		case MIMEPOSTForm:
+			if err := r.ParseForm(); err != nil {
+				vr.Err = ValidateErrorWrap(err, ErrBodyParse)
+			}
+		case MIMEMultipartPOSTForm:
+			if err := r.ParseMultipartForm(defaultMemory); err != nil {
+				vr.Err = ValidateErrorWrap(err, ErrBodyParse)
+			}
+		case MIMEJSON:
+			body := DumpRequestPure(r)
+			if len(body) != 0 {
+				vr.BodyBytes = body
+			} else {
+				vr.Err = ValidateErrorWrap(errors.New("body empty"), ErrBodyRead)
+			}
+		default:
+			vr.Err = ValidateErrorWrap(errors.New("mediaType not support"), ErrMediaType)
+		}
 	default:
 		// GET DELETE HEAD OPTION
 	}
@@ -95,36 +107,24 @@ func parse(r *http.Request, obj interface{}, vr *ValidateResult) {
 	}
 
 	// parse url query
-	parseQueryDecode(r, obj, vr)
+	parseQuery(r, vr)
 }
 
-func parsePost(r *http.Request, obj interface{}, vr *ValidateResult) {
-	switch vr.MediaType {
-	case MIMEPOSTForm:
-		if err := r.ParseForm(); err != nil {
-			vr.Err = ValidateErrorWrap(err, ErrBodyParse)
+func decodeTo(r *http.Request, obj interface{}, vr *ValidateResult) {
+	if len(vr.BodyBytes) > 0 {
+		if err := json.Unmarshal(vr.BodyBytes, obj); err != nil {
+			vr.Err = ValidateErrorWrap(err, ErrBodyUnmarshal)
 		}
-	case MIMEMultipartPOSTForm:
-		if err := r.ParseMultipartForm(defaultMemory); err != nil {
-			vr.Err = ValidateErrorWrap(err, ErrBodyParse)
-		}
-	case MIMEJSON:
-		body := DumpRequestPure(r)
-		if len(body) != 0 {
-			vr.BodyBytes = body
-			if err := json.Unmarshal(body, obj); err != nil {
-				vr.Err = ValidateErrorWrap(err, ErrBodyUnmarshal)
-			}
-		} else {
-			vr.Err = ValidateErrorWrap(errors.New("body empty"), ErrBodyRead)
-		}
-	default:
-		vr.Err = ValidateErrorWrap(errors.New("mediaType not support"), ErrMediaType)
+	}
+
+	if err := DecodeForm(obj, vr.QueryValues); err != nil {
+		vr.Err = ValidateErrorWrap(err, ErrDecode)
+		return
 	}
 }
 
 // 解析 URL ,并将 URL 参数解析到指定对象
-func parseQueryDecode(r *http.Request, obj interface{}, vr *ValidateResult) {
+func parseQuery(r *http.Request, vr *ValidateResult) {
 	parseQuery, err := ParseQuery(r)
 
 	if err != nil {
@@ -134,11 +134,6 @@ func parseQueryDecode(r *http.Request, obj interface{}, vr *ValidateResult) {
 
 	if parseQuery != nil && len(parseQuery) > 0 {
 		vr.QueryValues = NewQueryWith(vr.QueryValues).With(parseQuery).v
-	}
-
-	if err := DecodeForm(obj, vr.QueryValues); err != nil {
-		vr.Err = ValidateErrorWrap(err, ErrDecode)
-		return
 	}
 }
 

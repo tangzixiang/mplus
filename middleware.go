@@ -43,6 +43,18 @@ func Bind(validateData interface{}) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		var vo interface{}
+		var vr ValidateResult
+
+		// 1. 解析数据
+		if parse(r, &vr); vr.Err != nil {
+			fmt.Printf("[muxplus] [request:%v] parse data failed : %v\n", GetHeaderRequestID(r), err)
+			dealValidateResultErr(w, r, err)
+			return
+		}
+
+		if len(vr.BodyBytes) != 0 { // 放这里是因为有可能序列化失败但是 body 读取成功，可以供后续使用
+			SetContextValue(r.Context(), BodyData, vr.BodyBytes)
+		}
 
 		// 得到一个全新的 VO 的对象
 		if vo, err = checkValidateData(w, r, validateData); err != nil {
@@ -51,14 +63,16 @@ func Bind(validateData interface{}) http.HandlerFunc {
 			return
 		}
 
-		vr := ParseValidate(r, vo)
-
-		if len(vr.BodyBytes) != 0 { // 放这里是因为有可能序列化失败但是 body 读取成功，可以供后续使用
-			SetContextValue(r.Context(), BodyData, vr.BodyBytes)
+		// 绑定数据
+		if decodeTo(r, vo, &vr); vr.Err != nil {
+			fmt.Printf("[muxplus] [request:%v] decode data to object failed : %v\n", GetHeaderRequestID(r), vr.Err)
+			dealValidateResultErr(w, r, vr.Err)
+			return
 		}
 
-		if vr.Err != nil {
-			fmt.Printf("[muxplus] [request:%v] parse validate object failed: %v\n", GetHeaderRequestID(r), vr.Err)
+		// 数据校验
+		if bindValidate(r, vo, &vr); vr.Err != nil {
+			fmt.Printf("[muxplus] [request:%v] decode data to object failed : %v\n", GetHeaderRequestID(r), vr.Err)
 			dealValidateResultErr(w, r, vr.Err)
 			return
 		}
@@ -81,7 +95,7 @@ func checkValidateData(w http.ResponseWriter, r *http.Request, validateData inte
 	if voTypeFunc, ok := validateData.(ValidateFunc); ok {
 		var err error
 		if validateData, err = voTypeFunc(r); err != nil {
-			return nil, err
+			return nil, ValidateError{lastErr: err, errType: ErrDecode}
 		}
 
 		if reflect.TypeOf(validateData).Kind() != reflect.Ptr {

@@ -18,8 +18,21 @@ func TestParseValidate(t *testing.T) {
 	requset := httptest.NewRequest(http.MethodPost, "http://localhost?query=test", buffer)
 	SetRequestHeader(requset, ContentType, MIMEJSON)
 
+	var vr ValidateResult
 	var user User
-	vr := ParseValidate(requset, &user)
+
+	// 1. 解析数据
+	if parse(requset, &vr); !assert.Nil(t, vr.Err) {
+		return
+	}
+
+	// 绑定数据
+	if decodeTo(requset, &user, &vr); !assert.Nil(t, vr.Err){
+		return
+	}
+
+	// 数据校验
+	bindValidate(requset, &user, &vr)
 
 	if !assert.Equal(t, vr.Err, nil) {
 		return
@@ -49,12 +62,23 @@ func TestParseValidateErr(t *testing.T) {
 	requset := httptest.NewRequest(http.MethodPost, "http://localhost?query=test", buffer)
 	SetRequestHeader(requset, ContentType, MIMEJSON)
 
+	var vr ValidateResult
 	var user User
-	vr := ParseValidate(requset, &user)
 
-	if !assert.NotEqual(t, vr.Err, nil) {
+	// 1. 解析数据
+	if parse(requset, &vr); !assert.Nil(t, vr.Err) {
 		return
-	} //
+	}
+
+	// 绑定数据
+	if decodeTo(requset, &user, &vr); !assert.Nil(t, vr.Err){
+		return
+	}
+
+	// 数据校验
+	if bindValidate(requset, &user, &vr); !assert.NotEqual(t, vr.Err, nil){
+		return
+	}
 
 	if !assert.IsType(t, ValidateError{}, errors.Cause(vr.Err)) {
 		return
@@ -72,8 +96,10 @@ func TestParseValidateErrMediaTypeParse(t *testing.T) {
 	requset := httptest.NewRequest(http.MethodPost, "http://localhost?query=test", buffer)
 	SetRequestHeader(requset, ContentType, "application/javascript;xxx")
 
-	var user User
-	vr := ParseValidate(requset, &user)
+	var vr ValidateResult
+
+	// 1. 解析数据
+	parse(requset, &vr)
 
 	if !assert.NotEqual(t, vr.Err, nil) {
 		return
@@ -94,8 +120,10 @@ func TestParseValidateErrMediaType(t *testing.T) {
 	requset := httptest.NewRequest(http.MethodPost, "http://localhost?query=test", buffer)
 	SetRequestHeader(requset, ContentType, "application/javascript")
 
-	var user User
-	vr := ParseValidate(requset, &user)
+	var vr ValidateResult
+
+	// 1. 解析数据
+	parse(requset, &vr)
 
 	if !assert.NotEqual(t, vr.Err, nil) {
 		return
