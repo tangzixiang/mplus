@@ -47,8 +47,8 @@ func Bind(validateData interface{}) http.HandlerFunc {
 
 		// 1. 解析数据
 		if parse(r, &vr); vr.Err != nil {
-			fmt.Printf("[muxplus] [request:%v] parse data failed : %v\n", GetHeaderRequestID(r), err)
-			dealValidateResultErr(w, r, err)
+			fmt.Printf("[muxplus] [request:%v] parse data failed : %v\n", GetHeaderRequestID(r), vr.Err)
+			dealValidateResultErr(w, r, vr.Err)
 			return
 		}
 
