@@ -23,6 +23,12 @@ type Query struct {
 	v url.Values
 }
 
+// DynamicQueryValue 回调计算 value 值的 handler,可以用于延迟计算 value
+type DynamicQueryValue func() string
+
+// DynamicQueryPairs 回调计算 pair 对的 handler,可以用于延迟计算多对 key value
+type DynamicQueryPairs func() []string
+
 // NewQuery 获取一个 Query 实例
 func NewQuery() *Query {
 	return &Query{v: url.Values{}}
@@ -40,11 +46,27 @@ func (q *Query) Set(key, value string) *Query {
 	return q
 }
 
-// Set set the key to value if ensure is true. It replaces any existing
+// SetD set the key to value. It replaces any existing
+// values.
+func (q *Query) SetD(key string, value DynamicQueryValue) *Query {
+	q.v.Set(key, value())
+	return q
+}
+
+// SetIf set the key to value if ensure is true. It replaces any existing
 // values.
 func (q *Query) SetIf(ensure bool, key, value string) *Query {
 	if ensure {
 		q.Set(key, value)
+	}
+	return q
+}
+
+// SetIfD set the key to value if ensure is true. It replaces any existing
+// values.
+func (q *Query) SetIfD(ensure bool, key string, value DynamicQueryValue) *Query {
+	if ensure {
+		q.Set(key, value())
 	}
 	return q
 }
@@ -67,6 +89,25 @@ func (q *Query) SetPairs(key, value string, pairs ... string) *Query {
 	return q
 }
 
+// SetPairsD set the key to value. It replaces any existing
+// values.
+// For example:
+//  - q.SetPairsD(func ()[]string{return []string{key1,value1,key2,value2,...}})
+func (q *Query) SetPairsD(pairs DynamicQueryPairs) *Query {
+	_pairs := pairs()
+	l := len(_pairs)
+
+	if l <= 0 || l%2 != 0 {
+		return q
+	}
+
+	for i := 0; i < l; i += 2 {
+		q.v.Set(_pairs[i], _pairs[i+1])
+	}
+
+	return q
+}
+
 // SetPairsIf set the key to value if ensure is true. It replaces any existing
 // values.
 // For example:
@@ -74,6 +115,17 @@ func (q *Query) SetPairs(key, value string, pairs ... string) *Query {
 func (q *Query) SetPairsIf(ensure bool, key, value string, pairs ... string) *Query {
 	if ensure {
 		q.SetPairs(key, value, pairs...)
+	}
+	return q
+}
+
+// SetPairsIfD set the key to value if ensure is true. It replaces any existing
+// values.
+// For example:
+//  - q.SetPairsIfD(GetTrue(),func ()[]string{return []string{key1,value1,key2,value2,...}})
+func (q *Query) SetPairsIfD(ensure bool, pairs DynamicQueryPairs) *Query {
+	if ensure {
+		q.SetPairsD(pairs)
 	}
 	return q
 }
@@ -122,11 +174,27 @@ func (q *Query) Add(key, value string) *Query {
 	return q
 }
 
+// AddD add the value to key. It appends to any existing
+// values associated with key.
+func (q *Query) AddD(key string, value DynamicQueryValue) *Query {
+	q.v.Add(key, value())
+	return q
+}
+
 // AddIf add the value to key if ensure is true. It appends to any existing
 // values associated with key.
 func (q *Query) AddIf(ensure bool, key, value string) *Query {
 	if ensure {
 		q.Add(key, value)
+	}
+	return q
+}
+
+// AddIf add the value to key if ensure is true. It appends to any existing
+// values associated with key.
+func (q *Query) AddIfD(ensure bool, key string, value DynamicQueryValue) *Query {
+	if ensure {
+		q.Add(key, value())
 	}
 	return q
 }
@@ -148,6 +216,25 @@ func (q *Query) AddPairs(key, value string, pairs ... string) *Query {
 	return q
 }
 
+// AddPairsD add the value to key. It appends to any existing
+// values associated with key.
+// For example:
+//  - q.AddPairsD(func()[]string{return []string{key1,value1,key2,value2,...}})
+func (q *Query) AddPairsD(pairs DynamicQueryPairs) *Query {
+	_pairs := pairs()
+	l := len(_pairs)
+
+	if l <= 0 || l%2 != 0 {
+		return q
+	}
+
+	for i := 0; i < l; i += 2 {
+		q.v.Add(_pairs[i], _pairs[i+1])
+	}
+
+	return q
+}
+
 // AddPairsIf add the value to key if ensure is true. It appends to any existing
 // values associated with key.
 // For example:
@@ -155,6 +242,18 @@ func (q *Query) AddPairs(key, value string, pairs ... string) *Query {
 func (q *Query) AddPairsIf(ensure bool, key, value string, pairs ... string) *Query {
 	if ensure {
 		q.AddPairs(key, value, pairs...)
+	}
+
+	return q
+}
+
+// AddPairsIfD add the value to key if ensure is true. It appends to any existing
+// values associated with key.
+// For example:
+//  - q.AddPairsIfD(GetTrue(),func()[]string{return []string{key1,value1,key2,value2,...}})
+func (q *Query) AddPairsIfD(ensure bool, pairs DynamicQueryPairs) *Query {
+	if ensure {
+		q.AddPairsD(pairs)
 	}
 
 	return q
@@ -225,7 +324,7 @@ func (q *Query) With(v url.Values) *Query {
 }
 
 // WithIf 将 v 同步合并,当且 ensure 为 true
-func (q *Query) WithIf(ensure bool,v url.Values) *Query {
+func (q *Query) WithIf(ensure bool, v url.Values) *Query {
 	if ensure {
 		q.With(v)
 	}

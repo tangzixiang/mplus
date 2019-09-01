@@ -1,6 +1,7 @@
 package mplus
 
 import (
+	"fmt"
 	"net/url"
 	"testing"
 
@@ -61,7 +62,7 @@ func TestQuery_AppendToURIf(t *testing.T) {
 
 func TestQuery_SetIf(t *testing.T) {
 	values := map[string]interface{}{
-		"name": nil, // do not add
+		"name": nil, // will be continue
 		"age":  "15",
 	}
 
@@ -81,4 +82,59 @@ func TestQuery_SetIf(t *testing.T) {
 	if !assert.Equal(t, path, generatePath) {
 		return
 	}
+}
+
+func TestQuery_SetIfD(t *testing.T) {
+	values := map[string]interface{}{
+		"name": nil, // will be continue
+		"age":  "15",
+	}
+
+	urlValues := make(url.Values)
+	for key, value := range values {
+		if value != nil {
+			urlValues.Set(key, value.(string))
+		}
+	}
+
+	path := "http://localhost/users/1?" + urlValues.Encode()
+	generatePath := NewQuery().
+		SetIfD(values["name"] != nil, "name", func() string { return values["name"].(string) }). // not panic because callback is lazy evaluation
+		SetIf(values["age"] != nil, "age", "15").
+		AppendToURIFormat("http://localhost/users/%v?", 1)
+
+	if !assert.Equal(t, path, generatePath) {
+		return
+	}
+}
+
+func TestQuery_SetPairsD(t *testing.T) {
+
+	values := map[string]int{
+		"first":  1,
+		"second": 2,
+		"third":  3,
+	}
+
+	urlValues := make(url.Values)
+
+	for key, value := range values {
+		urlValues.Set(key, fmt.Sprint(value))
+	}
+
+	path := "http://localhost/users/1?" + urlValues.Encode()
+	generatePath := NewQuery().SetPairsD(func() []string { // lazy dynamic
+		var pairs []string
+
+		for key, value := range values {
+			pairs = append(pairs, key, fmt.Sprint(value))
+		}
+
+		return pairs
+	}).AppendToURIFormat("http://localhost/users/%v?", 1)
+
+	if !assert.Equal(t, path, generatePath) {
+		return
+	}
+
 }
