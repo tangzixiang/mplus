@@ -34,7 +34,7 @@ var (
 )
 
 // bindValidate 解析请求并将数据注入到指定对象，返回解析结果
-func bindValidate(r *http.Request, obj interface{},vr *ValidateResult) {
+func bindValidate(r *http.Request, obj interface{}, vr *ValidateResult) {
 
 	// 2. tag 规则校验
 	if err := Validate.Struct(obj); err != nil {
@@ -53,7 +53,7 @@ func bindValidate(r *http.Request, obj interface{},vr *ValidateResult) {
 	return
 }
 
-func parse(r *http.Request,vr *ValidateResult) {
+func parse(r *http.Request, vr *ValidateResult) {
 
 	var err error
 
@@ -79,7 +79,7 @@ func parse(r *http.Request,vr *ValidateResult) {
 			body := DumpRequestPure(r)
 			if len(body) != 0 {
 				vr.BodyBytes = body
-			} else {
+			} else if StrictJSONBodyCheck() { // 是否严格校验 json body
 				vr.Err = ValidateErrorWrap(errors.New("body empty"), ErrBodyRead)
 			}
 		default:

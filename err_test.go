@@ -26,6 +26,8 @@ func TestRegisterValidateErrorFunc(t *testing.T) {
 		Abort(r)
 	})
 
+	SetStrictJSONBodyCheck(true) // 设置严格校验模式
+
 	w := http.ResponseWriter(httptest.NewRecorder())
 
 	r := SetRequestHeader(
