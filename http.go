@@ -1,187 +1,98 @@
 package mplus
 
 import (
-	"bytes"
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
-	"sync"
+	"github.com/tangzixiang/mplus/mhttp"
 )
 
-const (
-	requestAbortKey = "__abort"
-	responseStatus  = "__status"
-)
-
-// use for http.Request.ParseMultipartForm, unit is bytes
-var defaultMemory = int64(32 * 1024 * 1024)
-
-// EmptyRespData 空响应体
-var EmptyRespData = map[string]interface{}{}
-
-// SetDefaultMemorySize 设置 http.Request.ParseMultipartForm 参数 maxMemory
-func SetDefaultMemorySize(size int64) {
-	defaultMemory = size
-}
-
-// Abort 标识当前请求链已中断
-func Abort(r *http.Request) *http.Request {
-	SetContextValue(r.Context(), requestAbortKey, true)
-	return r
-}
-
-// IsAbort 判断当前请求链是否已中断
-func IsAbort(r *http.Request) bool {
-	return GetContextValueBool(r.Context(), requestAbortKey)
-}
-
-// Error 返回异常信息，当前方法触发的请求响应内容将是文本格式
-func Error(w http.ResponseWriter, message Message) {
-	http.Error(SetHTTPRespStatus(w, message.Status(), false), message.Default(), message.Status())
-}
-
-// AbortError 终止请求链并返回异常信息，当前方法触发的请求响应内容将是文本格式
-func AbortError(w http.ResponseWriter, r *http.Request, message Message) {
-	Abort(r)
-	Error(w, message)
-}
-
-// InternalServerError 500 系统内部错误
-func InternalServerError(w http.ResponseWriter, r *http.Request) {
-
-	registerFunc, exists := httpStatusMethodHub[http.StatusInternalServerError]
-
-	if !exists {
-		AbortError(w, r, MessageStatusInternalServerError)
-		return
-	}
-
-	registerFunc(w, Abort(r), MessageStatusInternalServerError, http.StatusInternalServerError)
-}
-
-// Redirect 重定向
-// The provided code should be in the 3xx range and is usually
-// StatusMovedPermanently, StatusFound or StatusSeeOther.
-func Redirect(w http.ResponseWriter, r *http.Request, url string, code int) {
-	http.Redirect(w, Abort(r), url, code)
-}
-
-// Forbidden 403 拒绝服务
-func Forbidden(w http.ResponseWriter, r *http.Request) {
-
-	registerFunc, exists := httpStatusMethodHub[http.StatusForbidden]
-
-	if !exists {
-		AbortError(w, r, MessageStatusForbidden)
-		return
-	}
-
-	registerFunc(w, Abort(r), MessageStatusForbidden, http.StatusForbidden)
-}
-
-// NotFound 404 资源不存在
-func NotFound(w http.ResponseWriter, r *http.Request) {
-
-	registerFunc, exists := httpStatusMethodHub[http.StatusNotFound]
-
-	if !exists {
-		AbortError(w, r, MessageStatusNotFound)
-		return
-	}
-
-	registerFunc(w, Abort(r), MessageStatusNotFound, http.StatusNotFound)
-}
-
-// Unauthorized 401 未认证
-func Unauthorized(w http.ResponseWriter, r *http.Request) {
-
-	registerFunc, exists := httpStatusMethodHub[http.StatusUnauthorized]
-
-	if !exists {
-		AbortError(w, r, MessageStatusUnauthorized)
-		return
-	}
-
-	registerFunc(w, Abort(r), MessageStatusUnauthorized, http.StatusUnauthorized)
-}
-
-// BadRequest 400 请求异常
-func BadRequest(w http.ResponseWriter, r *http.Request) {
-
-	registerFunc, exists := httpStatusMethodHub[http.StatusBadRequest]
-
-	if !exists {
-		AbortError(w, r, MessageStatusBadRequest)
-		return
-	}
-
-	registerFunc(w, Abort(r), MessageStatusBadRequest, http.StatusBadRequest)
-}
-
-// UnsupportedMediaType 415 不支持的媒体类型
-func UnsupportedMediaType(w http.ResponseWriter, r *http.Request) {
-
-	registerFunc, exists := httpStatusMethodHub[http.StatusUnsupportedMediaType]
-
-	if !exists {
-		AbortError(w, r, MessageUnsupportedMediaType)
-		return
-	}
-
-	registerFunc(w, Abort(r), MessageUnsupportedMediaType, http.StatusUnsupportedMediaType)
-}
-
-// JSON 正常响应 JSON 请求
-//
-// 如果在序列化的过程中发生异常则响应服务器异常状态
-func JSON(w http.ResponseWriter, r *http.Request, data interface{}, status int) {
-
-	jsonBytes, err := json.Marshal(data)
-	if err != nil {
-		InternalServerError(w, r)
-		return
-	}
-
-	SetResponseHeader(w, "Content-Type", "application/json; charset=utf-8")
-	_, err = SetHTTPRespStatus(w, status).Write(jsonBytes)
-	if err != nil {
-		InternalServerError(w, r)
-	}
-}
-
-// DumpRequest 读取 r 的 body 内容并保持 r.Body 可持续使用
-// 一般用于请求 handler 中读取 body 数据后，并保证后续代码可再次通过 r.Body 读取数据
-func DumpRequest(r *http.Request) string {
-
-	body, _ := ioutil.ReadAll(r.Body)
-
-	// Reset resp.Body so it can be use again
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-
-	return string(body)
-}
-
-// DumpRequestPure 读取 r 的 body 内容并保持 r.Body 可持续使用
-// 一般用于请求 handler 中读取 body 数据后，并保证后续代码可再次通过 r.Body 读取数据
-func DumpRequestPure(r *http.Request) []byte {
-
-	body, _ := ioutil.ReadAll(r.Body)
-	// Reset resp.Body so it can be use again
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-
-	return body
-}
-
-type StatusMethodCallback func(w http.ResponseWriter, r *http.Request, message Message, code int)
+type StatusMethodCallback = mhttp.StatusMethodCallback
+type ResponseWriter = mhttp.ResponseWriter
 
 var (
-	httpStatusMethodHubLock sync.Mutex
-	httpStatusMethodHub     = map[int]StatusMethodCallback{}
+	EmptyRespData                     = mhttp.EmptyRespData
+	DefaultMemorySize                 = mhttp.DefaultMemorySize
+	SetDefaultMemorySize              = mhttp.SetDefaultMemorySize
+	Abort                             = mhttp.Abort
+	NotAbort                          = mhttp.NotAbort
+	IsAbort                           = mhttp.IsAbort
+	Error                             = mhttp.Error
+	ErrorEmpty                        = mhttp.ErrorEmpty
+	Plain                             = mhttp.Plain
+	PlainEmpty                        = mhttp.PlainEmpty
+	AbortError                        = mhttp.AbortError
+	AbortEmptyError                   = mhttp.AbortEmptyError
+	AbortPlain                        = mhttp.AbortPlain
+	AbortEmptyPlain                   = mhttp.AbortEmptyPlain
+	Redirect                          = mhttp.Redirect
+	JSON                              = mhttp.JSON
+	JSONOK                            = mhttp.JSONOK
+	DumpRequest                       = mhttp.DumpRequest
+	DumpRequestPure                   = mhttp.DumpRequestPure
+	RegisterHttpStatusMethod          = mhttp.RegisterHttpStatusMethod
+	NewResponseWrite                  = mhttp.NewResponseWrite
+	GetHTTPRespStatus                 = mhttp.GetHTTPRespStatus
+	SetHTTPRespStatus                 = mhttp.SetHTTPRespStatus
+	UnWrapResponseWriter              = mhttp.UnWrapResponseWriter
+	CopyRequest                       = mhttp.CopyRequest
+	OK                                = mhttp.OK
+	Created                           = mhttp.Created
+	Accepted                          = mhttp.Accepted
+	NonAuthoritativeInfo              = mhttp.NonAuthoritativeInfo
+	NoContent                         = mhttp.NoContent
+	ResetContent                      = mhttp.ResetContent
+	PartialContent                    = mhttp.PartialContent
+	MultiStatus                       = mhttp.MultiStatus
+	AlreadyReported                   = mhttp.AlreadyReported
+	IMUsed                            = mhttp.IMUsed
+	MultipleChoices                   = mhttp.MultipleChoices
+	MovedPermanently                  = mhttp.MovedPermanently
+	Found                             = mhttp.Found
+	SeeOther                          = mhttp.SeeOther
+	NotModified                       = mhttp.NotModified
+	UseProxy                          = mhttp.UseProxy
+	TemporaryRedirect                 = mhttp.TemporaryRedirect
+	PermanentRedirect                 = mhttp.PermanentRedirect
+	BadRequest                        = mhttp.BadRequest
+	Unauthorized                      = mhttp.Unauthorized
+	PaymentRequired                   = mhttp.PaymentRequired
+	Forbidden                         = mhttp.Forbidden
+	NotFound                          = mhttp.NotFound
+	MethodNotAllowed                  = mhttp.MethodNotAllowed
+	NotAcceptable                     = mhttp.NotAcceptable
+	ProxyAuthRequired                 = mhttp.ProxyAuthRequired
+	RequestTimeout                    = mhttp.RequestTimeout
+	Conflict                          = mhttp.Conflict
+	Gone                              = mhttp.Gone
+	LengthRequired                    = mhttp.LengthRequired
+	PreconditionFailed                = mhttp.PreconditionFailed
+	RequestEntityTooLarge             = mhttp.RequestEntityTooLarge
+	RequestURITooLong                 = mhttp.RequestURITooLong
+	UnsupportedMediaType              = mhttp.UnsupportedMediaType
+	RequestedRangeNotSatisfiable      = mhttp.RequestedRangeNotSatisfiable
+	ExpectationFailed                 = mhttp.ExpectationFailed
+	Teapot                            = mhttp.Teapot
+	MisdirectedRequest                = mhttp.MisdirectedRequest
+	UnprocessableEntity               = mhttp.UnprocessableEntity
+	Locked                            = mhttp.Locked
+	FailedDependency                  = mhttp.FailedDependency
+	TooEarly                          = mhttp.TooEarly
+	UpgradeRequired                   = mhttp.UpgradeRequired
+	PreconditionRequired              = mhttp.PreconditionRequired
+	TooManyRequests                   = mhttp.TooManyRequests
+	RequestHeaderFieldsTooLarge       = mhttp.RequestHeaderFieldsTooLarge
+	UnavailableForLegalReasons        = mhttp.UnavailableForLegalReasons
+	InternalServerError               = mhttp.InternalServerError
+	NotImplemented                    = mhttp.NotImplemented
+	BadGateway                        = mhttp.BadGateway
+	ServiceUnavailable                = mhttp.ServiceUnavailable
+	GatewayTimeout                    = mhttp.GatewayTimeout
+	HTTPVersionNotSupported           = mhttp.HTTPVersionNotSupported
+	VariantAlsoNegotiates             = mhttp.VariantAlsoNegotiates
+	InsufficientStorage               = mhttp.InsufficientStorage
+	LoopDetected                      = mhttp.LoopDetected
+	NotExtended                       = mhttp.NotExtended
+	NetworkAuthenticationRequired     = mhttp.NetworkAuthenticationRequired
+	CallRegisterFuncOrAbortEmptyError = mhttp.CallRegisterFuncOrAbortEmptyError
+	CallRegisterFuncOrAbortEmptyPlain = mhttp.CallRegisterFuncOrAbortEmptyPlain
+	CallRegisterFuncOrAbortError      = mhttp.CallRegisterFuncOrAbortError
+	CallRegisterFuncOrAbortPlain      = mhttp.CallRegisterFuncOrAbortPlain
 )
-
-// RegisterHttpStatusMethod 注册默认的请求状态回调
-func RegisterHttpStatusMethod(code int, f StatusMethodCallback) {
-	httpStatusMethodHubLock.Lock()
-	httpStatusMethodHub[code] = f
-	httpStatusMethodHubLock.Unlock()
-}

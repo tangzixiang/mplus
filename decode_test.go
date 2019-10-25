@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	assert "github.com/stretchr/testify/require"
 )
 
 func TestDecodeForm(t *testing.T) {
@@ -22,8 +22,9 @@ func TestDecodeForm(t *testing.T) {
 
 func TestDecodeForms(t *testing.T) {
 	values01 := parseForm()
-	values02 := parseForm()
+	values02 := url.Values{}
 	values02.Set("Name", "New name")
+
 	user := User{}
 
 	DecodeForm(&user, values01, values02)
@@ -32,13 +33,8 @@ func TestDecodeForms(t *testing.T) {
 	assert.NotEqual(t, user.Name, values01.Get("Name"))
 
 	assert.Equal(t, fmt.Sprint(user.Age), values01.Get("Age"))
-	assert.Equal(t, fmt.Sprint(user.Age), values02.Get("Age"))
-
 	assert.Equal(t, user.Gender, values01.Get("Gender"))
-	assert.Equal(t, user.Gender, values02.Get("Gender"))
-
 	assert.Equal(t, user.Email, values01.Get("Email"))
-	assert.Equal(t, user.Email, values02.Get("Email"))
 }
 
 // this simulates the results of http.Request's ParseForm() function
