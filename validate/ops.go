@@ -15,7 +15,3 @@ func StrictJSONBodyCheck()bool{
 func SetStrictJSONBodyCheck(b bool){
 	strictJSONBodyCheck = b
 }
-
-// SetStrictJSONBodyCheckLockChan 由于测试存在多次调用及还原的情况，为了避免互相干扰，引入锁的机制
-// 不应该在实际项目中使用
-var SetStrictJSONBodyCheckLockChan = make(chan struct{}, 1)

@@ -17,5 +17,4 @@ var (
 	ValidatorStandErrMsg   = validate.ValidatorStandErrMsg
 	StrictJSONBodyCheck    = validate.StrictJSONBodyCheck
 	SetStrictJSONBodyCheck = validate.SetStrictJSONBodyCheck
-	SetStrictJSONBodyCheckLockChan = validate.SetStrictJSONBodyCheckLockChan
 )

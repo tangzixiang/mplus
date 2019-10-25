@@ -200,9 +200,9 @@ func SetRequestID(next http.HandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
     
-    // write "X-Request-Id" to resp’s head then call next by mplus which take next handler
+		// write "X-Request-Id" to resp’s head then call next by mplus which take next handler
 		mplus.PlusPlus(w,r).WriteRespHeader( 
-      mplus.HeaderRequestID, uuid.Must(uuid.NewV4()).String()).Handler(next).ServeHTTP()
+			mplus.HeaderRequestID,uuid.Must(uuid.NewV4()).String()).Handler(next).ServeHTTP()
 	}
 }
 ```
@@ -236,8 +236,8 @@ func SetRequestID(next http.HandlerFunc) http.HandlerFunc {
 		pp := mplus.PlusPlus(w, r).Handler(next)
 
 		// add "X-Request-Id" to request's context and header at the same time
-		pp.WriteRespHeader(mplus.HeaderRequestID, 
-      pp.SetStringR(mplus.HeaderRequestID, uuid.Must(uuid.NewV4()).String()))
+		pp.WriteRespHeader(mplus.HeaderRequestID,
+			pp.SetStringR(mplus.HeaderRequestID, uuid.Must(uuid.NewV4()).String()))
 
 		// call next
 		pp.ServeHTTP()
@@ -253,15 +253,15 @@ func PreSearchUser(next http.HandlerFunc) http.HandlerFunc {
 
 		pp := mplus.PlusPlus(w, r).Handler(next)
 
-    // search user by id which get from url then add to request's context
+		// search user by id which get from url then add to request's context
 		pp.Set(KeyUser, SearchUserService(pp.Query("id")))
 
 		// call next
 		pp.ServeHTTP()
     
-    // Or complete all steps at once as follows
-    // mplus.PlusPlus(w, r).Handler(next).
-    // Set(KeyUser, SearchUserService(pp.Query("id"))).ServeHTTP()
+		// Or complete all steps at once as follows
+		// mplus.PlusPlus(w, r).Handler(next).
+		// Set(KeyUser, SearchUserService(pp.Query("id"))).ServeHTTP()
 	}
 }
 
@@ -326,8 +326,8 @@ type V struct {
 }
 
 func main() {
-  // (*V)(nil) mean that is a nil point which hold type info
-  // bind model just need type info
+	// (*V)(nil) mean that is a nil point which hold type info
+	// bind model just need type info
 	http.ListenAndServe(":8080", mplus.MRote().Bind((*V)(nil)).HandlerFunc(Address))
 }
 
@@ -504,7 +504,7 @@ func SelectBindModel(r *http.Request) (interface{}, error) {
 		return (*InsertUser)(nil), nil
 	}
   
-  return nil, errors.New("bind type not found")
+	return nil, errors.New("bind type not found")
 }
 
 func main() {
@@ -516,7 +516,7 @@ func main() {
 		mplus.PlusPlus(w, r).JSON(mplus.Data{"err_message": err.Error()}, 400)
 	})
 
-  handler := mplus.MRote().Bind(mplus.ValidateFunc(SelectBindModel)).HandlerFunc(Whatever)
+	handler := mplus.MRote().Bind(mplus.ValidateFunc(SelectBindModel)).HandlerFunc(Whatever)
 	http.ListenAndServe(":8080",handler)
 }
 
@@ -524,7 +524,7 @@ func main() {
 func Whatever(w http.ResponseWriter, r *http.Request) {
 	pp := mplus.PlusPlus(w, r)
 
-  // got pp.VO() do anything
+	// got pp.VO() do anything
   
 	// pass data to response
 	pp.JSONOK(pp.VO())
@@ -662,16 +662,16 @@ fmt.Printf("%v\n",query.AppendToURI("http://localhost/users/1"))
 
 HTTP 响应状态码指示特定 [HTTP](https://developer.mozilla.org/zh-cn/HTTP) 请求是否已成功完成。mplus 为常用的响应状态码提供了便捷的 API。
 
-- `200` ：`mplus.PP.OK()`
-- `400` ：`mplus.PP.BadRequest()`
-- `401` :  `mplus.PP.Unauthorized()`
-- `403` :  `mplus.PP.Forbidden()`
-- `404` :  `mplus.PP.NotFound()`
-- `405` :  `mplus.PP.NotAllowed()`
-- `408` :  `mplus.PP.RequestTimeout()`
-- `409` :  `mplus.PP.Conflict()`
-- `415` :  `mplus.PP.UnsupportedMediaType()`
-- `500` : `mplus.PP.InternalServerError()`
+- `200`:`mplus.PP.OK()`
+- `400`:`mplus.PP.BadRequest()`
+- `401`:`mplus.PP.Unauthorized()`
+- `403`:`mplus.PP.Forbidden()`
+- `404`:`mplus.PP.NotFound()`
+- `405`:`mplus.PP.NotAllowed()`
+- `408`:`mplus.PP.RequestTimeout()`
+- `409`:`mplus.PP.Conflict()`
+- `415`:`mplus.PP.UnsupportedMediaType()`
+- `500`:`mplus.PP.InternalServerError()`
 - more ...
 
 示例如下：
@@ -683,7 +683,7 @@ func main() {
 	
 	//  response's status code is 200
 	mux.Handle("/200", mr.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    mplus.PlusPlus(w, r).OK()
+		mplus.PlusPlus(w, r).OK()
 	}))
 
 	//  response's status code is 400
@@ -710,7 +710,7 @@ func main() {
 		// zone. The time being formatted must be in UTC for Format to
 		// generate the correct format.
 		mplus.PlusPlus(w, r).WriteRespHeader(
-      mplus.HeaderDate, time.Now().Add(time.Hour).UTC().Format(http.TimeFormat)).Forbidden()
+			mplus.HeaderDate, time.Now().Add(time.Hour).UTC().Format(http.TimeFormat)).Forbidden()
 	}))
   
 	//  response's status code is 404
@@ -729,7 +729,7 @@ func main() {
 	//  response's status code is 408
 	mux.Handle("/408", mr.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-    // Connection: close
+		// Connection: close
 		// see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408
 		mplus.PlusPlus(w, r).WriteRespHeader(mplus.HeaderConnection, "close").RequestTimeout()
 	}))
@@ -752,7 +752,7 @@ func main() {
 func main() {
 	mux := http.NewServeMux()
 
-  // register a StatusBadRequest hook to change default's behavior
+	// register a StatusBadRequest hook to change default's behavior
 	mplus.RegisterHttpStatusMethod(http.StatusBadRequest, 
                       func(w http.ResponseWriter, r *http.Request, m message.Message, statusCode int) {
 
@@ -802,7 +802,7 @@ var ErrCodeAddrNotExists = 400001
 // ErrCodeCallbackFun will be perform when ErrCodeAddrNotExists be use to PP.CallbackByCode
 func ErrCodeCallbackFun(w http.ResponseWriter, r *http.Request, m mplus.Message, respData interface{}) {
   
-  // {"code":400001,"message":"addr not exists"}
+	// {"code":400001,"message":"addr not exists"}
 	mplus.JSON(w, r, mplus.Data{"message": m.En()}, m.Status())
 }
 
@@ -814,7 +814,7 @@ func main() {
 
 	// register a message for ErrCodeAddrNotExists
 	mplus.Messages.Add(
-    mplus.NewCallbackMessage(http.StatusBadRequest, ErrCodeAddrNotExists, "addr not exists", ErrCodeCallbackFun))
+		mplus.NewCallbackMessage(http.StatusBadRequest, ErrCodeAddrNotExists, "addr not exists", ErrCodeCallbackFun))
 
 	http.ListenAndServe(":8080", mplus.MRote().Bind((*V)(nil)).HandlerFunc(Address))
 }

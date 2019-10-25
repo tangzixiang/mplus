@@ -101,6 +101,10 @@ func TestParseValidateErrMediaType(t *testing.T) {
 
 func TestValidatorStandErrMsg(t *testing.T) {
 
+	// 使用通道模拟锁的机制防止与其他测试冲突
+	BeforeTest(true)
+	defer AfterTest(true)
+
 	// Parse body failed
 	RegisterValidateErrorFunc(ErrBodyValidate, func(w http.ResponseWriter, r *http.Request, err error) {
 		Abort(r)

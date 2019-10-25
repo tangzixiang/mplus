@@ -296,6 +296,10 @@ func TestBindFailedWithRegisterErrHandler(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
+	// 使用通道模拟锁的机制防止与其他测试冲突
+	BeforeTest(true)
+	defer AfterTest(true)
+
 	RegisterValidateErrorFunc(ErrBodyValidate, func(w http.ResponseWriter, r *http.Request, err error) {
 		PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
 	})
@@ -384,6 +388,10 @@ func TestBindErrMediaTypeParse(t *testing.T) {
 
 		response := httptest.NewRecorder()
 
+		// 使用通道模拟锁的机制防止与其他测试冲突
+		BeforeTest(true)
+		defer AfterTest(true)
+
 		RegisterValidateErrorFunc(ErrMediaTypeParse, func(w http.ResponseWriter, r *http.Request, err error) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, http.StatusUnsupportedMediaType)
 		})
@@ -403,6 +411,10 @@ func TestBindErrMediaTypeParse(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, "application/")
 
 		response := httptest.NewRecorder()
+
+		// 使用通道模拟锁的机制防止与其他测试冲突
+		BeforeTest(true)
+		defer AfterTest(true)
 
 		RegisterValidateErrorFunc(ErrMediaTypeParse, func(w http.ResponseWriter, r *http.Request, err error) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, http.StatusUnsupportedMediaType)
@@ -435,12 +447,8 @@ func TestBindErrBodyRead(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		// 使用通道模拟锁的机制防止与其他测试冲突
-		SetStrictJSONBodyCheckLockChan <- struct{}{}
-		SetStrictJSONBodyCheck(true) // 设置严格校验模式，当前模式下若无法读取 JSON 数据则会触发异常
-		defer func() {
-			SetStrictJSONBodyCheck(false)
-			<-SetStrictJSONBodyCheckLockChan
-		}()
+		BeforeTest(true)
+		defer AfterTest(true)
 
 		Bind((*V)(nil)).ServeHTTP(response, request)
 
@@ -458,12 +466,8 @@ func TestBindErrBodyRead(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		// 使用通道模拟锁的机制防止与其他测试冲突
-		SetStrictJSONBodyCheckLockChan <- struct{}{}
-		SetStrictJSONBodyCheck(true) // 设置严格校验模式，当前模式下若无法读取 JSON 数据则会触发异常
-		defer func() {
-			SetStrictJSONBodyCheck(false)
-			<-SetStrictJSONBodyCheckLockChan
-		}()
+		BeforeTest(true)
+		defer AfterTest(true)
 
 		RegisterValidateErrorFunc(ErrBodyRead, func(w http.ResponseWriter, r *http.Request, err error) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
@@ -512,6 +516,10 @@ func TestBindErrBodyUnmarshal(t *testing.T) {
 
 		response := httptest.NewRecorder()
 
+		// 使用通道模拟锁的机制防止与其他测试冲突
+		BeforeTest(true)
+		defer AfterTest(true)
+
 		RegisterValidateErrorFunc(ErrBodyUnmarshal, func(w http.ResponseWriter, r *http.Request, err error) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
 		})
@@ -557,6 +565,10 @@ func TestBindErrBodyParse(t *testing.T) {
 
 		response := httptest.NewRecorder()
 
+		// 使用通道模拟锁的机制防止与其他测试冲突
+		BeforeTest(true)
+		defer AfterTest(true)
+
 		RegisterValidateErrorFunc(ErrBodyParse, func(w http.ResponseWriter, r *http.Request, err error) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
 		})
@@ -590,6 +602,10 @@ func TestBindErrRequestValidate(t *testing.T) {
 	SetRequestHeader(request, HeaderContentType, ContentTypeJSON)
 
 	response := httptest.NewRecorder()
+
+	// 使用通道模拟锁的机制防止与其他测试冲突
+	BeforeTest(true)
+	defer AfterTest(true)
 
 	// RegisterGlobalValidateErrorHandler(func(w http.ResponseWriter, r *http.Request, err error) {
 	// 	cErr :=  errors.Cause(err).(errs.ValidateError)
