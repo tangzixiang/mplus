@@ -83,7 +83,7 @@ func dealValidateResultErr(w http.ResponseWriter, r *http.Request, err error) {
 	}
 
 	// 如果存在全局解析异常处理器则优先派遣至全局
-	if errs.GlobalValidateErrorHandler != nil{
+	if errs.GlobalValidateErrorHandler != nil {
 		errs.GlobalValidateErrorHandler(w, r, cErr)
 		return
 	}

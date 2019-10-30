@@ -14,7 +14,7 @@ func main() {
 
 // increase num per request
 func AddNum(w http.ResponseWriter, r *http.Request) {
-	num ++
+	num++
 }
 
 func Num(w http.ResponseWriter, r *http.Request) {

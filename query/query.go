@@ -92,7 +92,7 @@ func (q *Query) SetIfD(ensure bool, key string, value DynamicQueryValue) *Query 
 // SetPairs set the key to value. It replaces any existing
 // values.
 //  q.SetPairs(key1,value1,key2,value2,...)
-func (q *Query) SetPairs(key, value string, pairs ... string) *Query {
+func (q *Query) SetPairs(key, value string, pairs ...string) *Query {
 	q.v.Set(key, value)
 
 	if len(pairs) <= 0 || len(pairs)%2 != 0 {
@@ -127,7 +127,7 @@ func (q *Query) SetPairsD(pairs DynamicQueryPairs) *Query {
 // SetPairsIf set the key to value if ensure is true. It replaces any existing
 // values.
 //  q.SetPairsIf(GetTrue(),key1,value1,key2,value2,...)
-func (q *Query) SetPairsIf(ensure bool, key, value string, pairs ... string) *Query {
+func (q *Query) SetPairsIf(ensure bool, key, value string, pairs ...string) *Query {
 	if ensure {
 		q.SetPairs(key, value, pairs...)
 	}
@@ -214,7 +214,7 @@ func (q *Query) AddIfD(ensure bool, key string, value DynamicQueryValue) *Query 
 // AddPairs add the value to key. It appends to any existing
 // values associated with key.
 //  q.AddPairs(key1,value1,key2,value2,...)
-func (q *Query) AddPairs(key, value string, pairs ... string) *Query {
+func (q *Query) AddPairs(key, value string, pairs ...string) *Query {
 	q.v.Add(key, value)
 	if len(pairs) <= 0 || len(pairs)%2 != 0 {
 		return q
@@ -248,7 +248,7 @@ func (q *Query) AddPairsD(pairs DynamicQueryPairs) *Query {
 // AddPairsIf add the value to key if ensure is true. It appends to any existing
 // values associated with key.
 //  q.AddPairsIf(GetTrue(),key1,value1,key2,value2,...)
-func (q *Query) AddPairsIf(ensure bool, key, value string, pairs ... string) *Query {
+func (q *Query) AddPairsIf(ensure bool, key, value string, pairs ...string) *Query {
 	if ensure {
 		q.AddPairs(key, value, pairs...)
 	}
@@ -360,7 +360,7 @@ func (q *Query) AppendToURI(uri string) string {
 }
 
 // AppendToURIf 将请求字段追加至 URI 上
-func (q *Query) AppendToURIFormat(formatURI string, a ... interface{}) string {
+func (q *Query) AppendToURIFormat(formatURI string, a ...interface{}) string {
 	return q.AppendToURI(fmt.Sprintf(formatURI, a...))
 }
 

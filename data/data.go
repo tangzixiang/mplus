@@ -60,7 +60,7 @@ func (d Data) PushIfD(ensure bool, key string, value DynamicDataValue) Data {
 //
 // For example:
 //  - d.PushPairs(key1,value1,key2,value2,...)
-func (d Data) PushPairs(key string, value interface{}, pairs ... interface{}) Data {
+func (d Data) PushPairs(key string, value interface{}, pairs ...interface{}) Data {
 	pairs = append([]interface{}{key, value}, pairs...)
 
 	if len(pairs)%2 != 0 {
@@ -80,7 +80,7 @@ func (d Data) PushPairs(key string, value interface{}, pairs ... interface{}) Da
 //
 // For example:
 //  - d.PushPairsIf(GetTrue(),key1,value1,key2,value2,...)
-func (d Data) PushPairsIf(ensure bool, key string, value interface{}, pairs ... interface{}) Data {
+func (d Data) PushPairsIf(ensure bool, key string, value interface{}, pairs ...interface{}) Data {
 	if !ensure {
 		return d
 	}
@@ -140,7 +140,7 @@ func (d Data) PushNotExistsIfD(ensure bool, key string, value DynamicDataValue) 
 //
 // For example:
 //  - d.PushPairsNotExists(key1,value1,key2,value2,...)
-func (d Data) PushPairsNotExists(key string, value interface{}, pairs ... interface{}) Data {
+func (d Data) PushPairsNotExists(key string, value interface{}, pairs ...interface{}) Data {
 	pairs = append([]interface{}{key, value}, pairs...)
 
 	if len(pairs)%2 != 0 {
@@ -162,7 +162,7 @@ func (d Data) PushPairsNotExists(key string, value interface{}, pairs ... interf
 //
 // For example:
 //  - d.PushPairsNotExistsIf(GetTrue(),key1,value1,key2,value2,...)
-func (d Data) PushPairsNotExistsIf(ensure bool, key string, value interface{}, pairs ... interface{}) Data {
+func (d Data) PushPairsNotExistsIf(ensure bool, key string, value interface{}, pairs ...interface{}) Data {
 	if !ensure {
 		return d
 	}
@@ -191,7 +191,7 @@ func (d Data) Del(key string) Data {
 }
 
 // DelAll 删除多个键
-func (d Data) DelAll(keys ... string) Data {
+func (d Data) DelAll(keys ...string) Data {
 	for _, key := range keys {
 		delete(d, key)
 	}
@@ -220,6 +220,6 @@ func (d Data) Keys() (keys []string) {
 }
 
 // Len 获取 Data 的长度
-func (d Data) Len()int{
+func (d Data) Len() int {
 	return len(d)
 }

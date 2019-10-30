@@ -14,13 +14,13 @@ func main() {
 	http.ListenAndServe(":8080",
 		mplus.Use(mplus.PreMiddleware)( // use middleware Pre to init Context
 			mplus.ThunkHandler( // compress handlers
-				mplus.Bind((*V)(nil)), // add pre handler -> Bind
+				mplus.Bind((*V)(nil)),       // add pre handler -> Bind
 				http.HandlerFunc(Address))), // last handler is target httpHandler
 	)
 }
 
 func Address(w http.ResponseWriter, r *http.Request) {
 	pp := mplus.PlusPlus(w, r)
-	
+
 	pp.JSON(pp.VO(), 200)
 }

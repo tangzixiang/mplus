@@ -160,7 +160,7 @@ var ValidateErrorHub = map[ValidateErrorType]ValidateErrorFunc{
 // RegisterGlobalValidateErrorHandler 全局解析异常处理器
 var GlobalValidateErrorHandler ValidateErrorFunc
 
-// RegisterGlobalValidateErrorHandler 注册全局解析异常处理器
+// RegisterGlobalValidateErrorHandler 注册全局 ValidateError 异常处理器，注册后，指定类型的 ValidateError handler 将不在执行
 func RegisterGlobalValidateErrorHandler(fun ValidateErrorFunc) {
 	GlobalValidateErrorHandler = fun
 }

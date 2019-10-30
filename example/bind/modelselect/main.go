@@ -42,7 +42,7 @@ func main() {
 	})
 
 	handler := mplus.MRote().Bind(mplus.ValidateFunc(SelectBindModel)).HandlerFunc(Whatever)
-	http.ListenAndServe(":8080",handler)
+	http.ListenAndServe(":8080", handler)
 }
 
 // Handler

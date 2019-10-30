@@ -18,7 +18,7 @@ func main() {
 	})
 
 	//  response's status code is 400
-	mux.Handle("/400",  mplus.MRote().HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/400", mplus.MRote().HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mplus.PlusPlus(w, r).BadRequest()
 	}))
 

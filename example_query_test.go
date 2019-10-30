@@ -42,11 +42,11 @@ func ExampleQuery_SetIfD() {
 		"age":  "15",
 	}
 
-	query :=  NewQuery().
+	query := NewQuery().
 		SetIfD(values["name"] != nil, "name", func() string { return values["name"].(string) }). // will not panic because callback is lazy evaluation
 		SetIfD(values["age"] != nil, "age", func() string { return values["age"].(string) })
 
-	fmt.Printf("%v\n",query.AppendToURI("http://localhost/users/1"))
+	fmt.Printf("%v\n", query.AppendToURI("http://localhost/users/1"))
 
 	// OutPut:
 	// http://localhost/users/1?age=15
@@ -54,7 +54,7 @@ func ExampleQuery_SetIfD() {
 
 func ExampleQuery_SetPairsD() {
 
-	query :=  NewQuery().SetPairsD(func() []string { // lazy dynamic
+	query := NewQuery().SetPairsD(func() []string { // lazy dynamic
 		values := map[string]int{
 			"first":  1,
 			"second": 2,
@@ -70,7 +70,7 @@ func ExampleQuery_SetPairsD() {
 		return pairs
 	})
 
-	fmt.Printf("%v\n",query.AppendToURI("http://localhost/users/1"))
+	fmt.Printf("%v\n", query.AppendToURI("http://localhost/users/1"))
 
 	// OutPut:
 	// http://localhost/users/1?first=1&second=2&third=3

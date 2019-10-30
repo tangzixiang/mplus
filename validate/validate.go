@@ -55,7 +55,7 @@ func DecodeTo(r *http.Request, obj interface{}, vr *ValidateResult) {
 }
 
 // CheckValidateData 校验及获取一个用于绑定的 model 对象
-func CheckValidateData(r *http.Request, validateData interface{}, vr *ValidateResult) (interface{}) {
+func CheckValidateData(r *http.Request, validateData interface{}, vr *ValidateResult) interface{} {
 	return checkValidateData(r, validateData, vr)
 }
 
@@ -201,7 +201,7 @@ func parseQuery(r *http.Request, vr *ValidateResult) {
 	}
 }
 
-func checkValidateData(r *http.Request, validateData interface{}, vr *ValidateResult) (interface{}) {
+func checkValidateData(r *http.Request, validateData interface{}, vr *ValidateResult) interface{} {
 
 	// 如果是函数则获取函数返回的值,返回值只能是指针
 	if voTypeFunc, ok := validateData.(ValidateFunc); ok {
@@ -219,7 +219,7 @@ func checkValidateData(r *http.Request, validateData interface{}, vr *ValidateRe
 
 	return reflect.New( // new vo
 		reflect.TypeOf(validateData). // get type ptr
-			Elem(), // get type
+						Elem(), // get type
 	).Interface()
 }
 

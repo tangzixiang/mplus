@@ -21,7 +21,7 @@ func MaxVisitTimesControl(w http.ResponseWriter, r *http.Request) {
 
 // increase num per request
 func AddNum(w http.ResponseWriter, r *http.Request) {
-	lastVisitIndex ++
+	lastVisitIndex++
 }
 
 func Num(w http.ResponseWriter, r *http.Request) {

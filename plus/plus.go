@@ -59,6 +59,7 @@ func (p *PP) NotAbort() *PP {
 	mhttp.NotAbort(p.r)
 	return p
 }
+
 // IsAbort 判断当前请求是否中断
 func (p *PP) IsAbort() bool {
 	return mhttp.IsAbort(p.r)
@@ -861,7 +862,7 @@ func (p *PP) GetHeaderValues(key string) []string {
 }
 
 // SplitHeader 分割指定请求头内容
-func (p *PP) SplitHeader(key string, splitSep string) [] string {
+func (p *PP) SplitHeader(key string, splitSep string) []string {
 	return header.SplitHeader(p.r, key, splitSep)
 }
 
@@ -1014,6 +1015,6 @@ func (p *PP) ReqBodyMap() (map[string]interface{}, error) {
 }
 
 // ReqBodyMap 读取 p.r 的 body 内容并保持 p.r.Body 可持续使用,body 内容会被序列化至 unmarshaler
-func (p *PP) ReqBodyToUnmarshaler(unmarshaler json.Unmarshaler) (error) {
+func (p *PP) ReqBodyToUnmarshaler(unmarshaler json.Unmarshaler) error {
 	return unmarshaler.UnmarshalJSON(mhttp.DumpRequestPure(p.r))
 }

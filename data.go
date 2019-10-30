@@ -6,4 +6,3 @@ import (
 
 type Data = data.Data
 type DynamicDataValue = data.DynamicDataValue
-

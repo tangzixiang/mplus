@@ -310,7 +310,6 @@ func CallRegisterFuncOrAbortEmptyError(w http.ResponseWriter, r *http.Request, m
 	registeredFunc(w, Abort(r), m, statusCode)
 }
 
-
 // CallRegisterFuncOrAbortEmptyPlain 调用已注册的状态回调，状态回调不存在则使用默认方式终止请求链
 func CallRegisterFuncOrAbortEmptyPlain(w http.ResponseWriter, r *http.Request, m message.Message, statusCode int) {
 
@@ -363,5 +362,3 @@ func RegisterHttpStatusMethod(statusCode int, f StatusMethodCallback) {
 	httpStatusMethodHub[statusCode] = f
 	httpStatusMethodHubLock.Unlock()
 }
-
-

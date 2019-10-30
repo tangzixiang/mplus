@@ -114,18 +114,18 @@ const (
 )
 
 const (
-	ContentTypeJSON   = header.ContentTypeJSON
-	ContentTypeForm   = header.ContentTypeForm
-	ContentTypeText   = header.ContentTypeText
-	ContentTypeXML    = header.ContentTypeXML
-	ContentTypeStream = header.ContentTypeStream
-	ContentTypeHTML = header.ContentTypeHTML
-	ContentTypeXML2 = header.ContentTypeXML2
-	ContentTypePlain = header.ContentTypePlain
+	ContentTypeJSON              = header.ContentTypeJSON
+	ContentTypeForm              = header.ContentTypeForm
+	ContentTypeText              = header.ContentTypeText
+	ContentTypeXML               = header.ContentTypeXML
+	ContentTypeStream            = header.ContentTypeStream
+	ContentTypeHTML              = header.ContentTypeHTML
+	ContentTypeXML2              = header.ContentTypeXML2
+	ContentTypePlain             = header.ContentTypePlain
 	ContentTypeMultipartPOSTForm = header.ContentTypeMultipartPOSTForm
-	ContentTypePROTOBUF = header.ContentTypePROTOBUF
-	ContentTypeMSGPACK = header.ContentTypeMSGPACK
-	ContentTypeMSGPACK2 = header.ContentTypeMSGPACK2
+	ContentTypePROTOBUF          = header.ContentTypePROTOBUF
+	ContentTypeMSGPACK           = header.ContentTypeMSGPACK
+	ContentTypeMSGPACK2          = header.ContentTypeMSGPACK2
 )
 
 // 请求头分割字符

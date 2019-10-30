@@ -576,7 +576,7 @@ func TestAbortPlain(t *testing.T) {
 	respW := NewResponseWrite(respR)
 	assert.Equal(t, respW.Status(), http.StatusOK)
 
-	AbortEmptyPlain(respW,r, MessageStatusBadRequest.Set(http.StatusText(http.StatusBadRequest)))
+	AbortEmptyPlain(respW, r, MessageStatusBadRequest.Set(http.StatusText(http.StatusBadRequest)))
 	assert.Equal(t, respW.Status(), http.StatusBadRequest)
 
 	resp := respR.Result()

@@ -15,7 +15,7 @@ func main() {
 func SetRequestID(next http.HandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		mplus.PlusPlus(w,r).WriteRespHeader(mplus.HeaderRequestID, uuid.Must(uuid.NewV4()).String()).Handler(next).ServeHTTP()
+		mplus.PlusPlus(w, r).WriteRespHeader(mplus.HeaderRequestID, uuid.Must(uuid.NewV4()).String()).Handler(next).ServeHTTP()
 	}
 }
 

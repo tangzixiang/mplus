@@ -66,7 +66,7 @@ func GetHTTPRespStatus(w http.ResponseWriter) int {
 // coverSupper 用于决定是否覆盖到底层的 http.ResponseWriter,默认 true
 // 若 coverSupper 设置为 false 则仅更新 responseWrite 实例的 status，不更新底层 http.ResponseWriter
 // 若无特殊使用需求，coverSupper 采用默认值即可
-func SetHTTPRespStatus(w http.ResponseWriter, statusCode int, coverSupper ... bool) http.ResponseWriter {
+func SetHTTPRespStatus(w http.ResponseWriter, statusCode int, coverSupper ...bool) http.ResponseWriter {
 
 	cover := true
 	if len(coverSupper) > 0 && !coverSupper[0] {
@@ -75,7 +75,7 @@ func SetHTTPRespStatus(w http.ResponseWriter, statusCode int, coverSupper ... bo
 
 	rw, ok := w.(ResponseWriter)
 
-	if ! ok {
+	if !ok {
 		w.WriteHeader(statusCode)
 		return w
 	}

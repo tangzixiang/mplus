@@ -59,7 +59,7 @@ func SetRequestHeadersIf(ensure bool, r *http.Request, headers map[string]string
 }
 
 // AddRequestHeader 添加指定请求头到 r
-func AddRequestHeader(r *http.Request, key string, values ... string) *http.Request {
+func AddRequestHeader(r *http.Request, key string, values ...string) *http.Request {
 	for _, value := range values {
 		r.Header.Add(key, value)
 	}
@@ -67,7 +67,7 @@ func AddRequestHeader(r *http.Request, key string, values ... string) *http.Requ
 }
 
 // AddRequestHeaderIf 添加指定请求头到 r，仅当 ensure 为 true 时生效
-func AddRequestHeaderIf(ensure bool, r *http.Request, key string, values ... string) *http.Request {
+func AddRequestHeaderIf(ensure bool, r *http.Request, key string, values ...string) *http.Request {
 	if ensure {
 		for _, value := range values {
 			r.Header.Add(key, value)
@@ -137,7 +137,7 @@ func SetResponseHeadersIf(ensure bool, w http.ResponseWriter, headers map[string
 }
 
 // AddResponseHeader 将指定响应头添加到 w 中
-func AddResponseHeader(w http.ResponseWriter, key string, values ... string) http.ResponseWriter {
+func AddResponseHeader(w http.ResponseWriter, key string, values ...string) http.ResponseWriter {
 	for _, value := range values {
 		w.Header().Add(key, value)
 	}
@@ -145,7 +145,7 @@ func AddResponseHeader(w http.ResponseWriter, key string, values ... string) htt
 }
 
 // AddResponseHeaderIf 将指定响应头添加到 w 中，仅当 ensure 为 true 时生效
-func AddResponseHeaderIf(ensure bool, w http.ResponseWriter, key string, values ... string) http.ResponseWriter {
+func AddResponseHeaderIf(ensure bool, w http.ResponseWriter, key string, values ...string) http.ResponseWriter {
 	if ensure {
 		for _, value := range values {
 			w.Header().Add(key, value)

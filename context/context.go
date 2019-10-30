@@ -15,7 +15,7 @@ const requestKey contextKey = iota
 
 // 内部使用请求上下文键值
 const (
-	// ReqData 用于获取校验通过后缓存于上下文的 VO 对象
+	// ReqData 用于获取校验通过后缓存于上下文的 model 对象
 	ReqData = "__req_data"
 
 	// BodyData 用于获取校验通过后缓存于上下文的请求体内容
@@ -86,7 +86,7 @@ func GetContextValueString(ctx context.Context, key string, defaultValue ...stri
 }
 
 // GetContextValueInt 获取上下文信息
-func GetContextValueInt(ctx context.Context, key string, defaultValue ... int) int {
+func GetContextValueInt(ctx context.Context, key string, defaultValue ...int) int {
 	value := GetContextValue(ctx, key)
 	rv, ok := value.(int)
 
@@ -104,7 +104,7 @@ func GetContextValueInt(ctx context.Context, key string, defaultValue ... int) i
 }
 
 // GetContextValueInt8 获取上下文信息
-func GetContextValueInt8(ctx context.Context, key string, defaultValue ... int8) int8 {
+func GetContextValueInt8(ctx context.Context, key string, defaultValue ...int8) int8 {
 	value := GetContextValue(ctx, key)
 	rv, ok := value.(int8)
 
