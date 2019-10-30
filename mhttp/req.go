@@ -1,13 +1,15 @@
-package mplus
+package mhttp
 
 import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/tangzixiang/mplus/context"
 )
 
-// CopyRequest 拷贝一个请求，body 不会被拷贝，因为 body 是一个数据流
+// CopyRequest 拷贝一个请求
 func CopyRequest(r *http.Request) *http.Request {
 
 	r2 := &http.Request{
@@ -22,7 +24,7 @@ func CopyRequest(r *http.Request) *http.Request {
 		RequestURI:       r.RequestURI,
 	}
 
-	// cope header
+	// copy header
 	if r.Header != nil {
 		r2.Header = http.Header{}
 
@@ -68,9 +70,9 @@ func CopyRequest(r *http.Request) *http.Request {
 
 	body, _ := ioutil.ReadAll(r.Body)
 
-	// Reset resp.Body so it can be use again
+	// Reset req.Body so it can be use again
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	r2.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
-	return r2.WithContext(CopyContext(r.Context()))
+	return r2.WithContext(context.CopyContext(r.Context()))
 }

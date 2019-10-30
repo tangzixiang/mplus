@@ -1,4 +1,4 @@
-package mplus
+package mhttp
 
 import (
 	"io"
@@ -21,7 +21,6 @@ type ResponseWriter interface {
 	Status() int
 
 	WriteHead(int)
-	ReaderFrom(src io.Reader) (n int64, err error)
 }
 
 var (
@@ -37,9 +36,9 @@ func (w *responseWrite) Status() int {
 	return w.status
 }
 
-func (w *responseWrite) WriteHead(code int) {
-	w.SetStatus(code)
-	w.ResponseWriter.WriteHeader(code)
+func (w *responseWrite) WriteHead(statusCode int) {
+	w.SetStatus(statusCode)
+	w.ResponseWriter.WriteHeader(statusCode)
 }
 
 // ReaderFrom 将指定流写入响应内
@@ -52,7 +51,8 @@ func NewResponseWrite(w http.ResponseWriter) ResponseWriter {
 	return &responseWrite{ResponseWriter: w, status: defaultStatus}
 }
 
-// GetHTTPRespStatus 获取响应状态
+// GetHTTPRespStatus 获取响应状态，
+// w 应为 responseWrite 实例，responseWrite 实例只能获取通过 NewResponseWrite 获取
 func GetHTTPRespStatus(w http.ResponseWriter) int {
 	if respW, ok := w.(ResponseWriter); ok {
 		return respW.Status()
@@ -61,8 +61,12 @@ func GetHTTPRespStatus(w http.ResponseWriter) int {
 	return http.StatusOK
 }
 
-// SetHTTPRespStatus 设置响应状态, w 应该是 responseWrite 实例, coverSupper 决定是否覆盖到底层的 http.ResponseWriter,默认 true
-func SetHTTPRespStatus(w http.ResponseWriter, status int, coverSupper ... bool) http.ResponseWriter {
+// SetHTTPRespStatus 设置响应状态,
+// w 应为 responseWrite 实例，responseWrite 实例只能获取通过 NewResponseWrite 获取
+// coverSupper 用于决定是否覆盖到底层的 http.ResponseWriter,默认 true
+// 若 coverSupper 设置为 false 则仅更新 responseWrite 实例的 status，不更新底层 http.ResponseWriter
+// 若无特殊使用需求，coverSupper 采用默认值即可
+func SetHTTPRespStatus(w http.ResponseWriter, statusCode int, coverSupper ...bool) http.ResponseWriter {
 
 	cover := true
 	if len(coverSupper) > 0 && !coverSupper[0] {
@@ -71,20 +75,25 @@ func SetHTTPRespStatus(w http.ResponseWriter, status int, coverSupper ... bool) 
 
 	rw, ok := w.(ResponseWriter)
 
-	if ! ok {
-		w.WriteHeader(status)
+	if !ok {
+		w.WriteHeader(statusCode)
 		return w
 	}
 
 	if cover {
-		rw.WriteHead(status)
+		rw.WriteHead(statusCode)
 	} else {
-		rw.SetStatus(status)
+		rw.SetStatus(statusCode)
 	}
 	return w
 }
 
-// ReaderFrom 将指定流写入响应内 , w 应该是 responseWrite 实例
-func ReaderFrom(w http.ResponseWriter, src io.Reader) (n int64, err error) {
-	return w.(ResponseWriter).ReaderFrom(src)
+// UnWrapResponseWriter 解包 ResponseWriter 获取内部的 http.ResponseWriter
+// 当前方法与 NewResponseWrite 相对应
+func UnWrapResponseWriter(resp http.ResponseWriter) http.ResponseWriter {
+	_resp, ok := resp.(*responseWrite)
+	if !ok {
+		return nil
+	}
+	return _resp.ResponseWriter
 }

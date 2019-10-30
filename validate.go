@@ -1,163 +1,20 @@
 package mplus
 
 import (
-	"encoding/json"
-	"net/http"
-	"net/url"
-
-	"github.com/pkg/errors"
-
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/tangzixiang/mplus/validate"
 )
 
-// RequestValidate 实现该接口的不同VO(请求结构体)可以自校验
-type RequestValidate interface {
-	Validate(r *http.Request) (ok bool /*校验是否成功*/, errMsg string /*校验失败的原因*/)
-}
+type RequestValidate = validate.RequestValidate
+type ValidateFunc = validate.ValidateFunc
+type ValidateResult = validate.ValidateResult
 
-// ValidateFunc 自定义当前请求需要用到的 VO 对象，用于
-// 返回的 VO 不应该为 nil，若无法返回正确的 VO 应该在返回的 error 中进行说明
-type ValidateFunc func(r *http.Request) (interface{}, error)
-
-// ValidateResult 请求校验结果
-type ValidateResult struct {
-	Err         error
-	MediaType   string
-	BodyBytes   []byte
-	BodyValues  url.Values
-	QueryValues url.Values
-}
-
-// 校验器
 var (
-	Validate = validator.New()
+	Validate               = validate.Validate
+	BindValidate           = validate.BindValidate
+	DecodeTo               = validate.DecodeTo
+	Parse                  = validate.Parse
+	CheckValidateData      = validate.CheckValidateData
+	ValidatorStandErrMsg   = validate.ValidatorStandErrMsg
+	StrictJSONBodyCheck    = validate.StrictJSONBodyCheck
+	SetStrictJSONBodyCheck = validate.SetStrictJSONBodyCheck
 )
-
-// bindValidate 解析请求并将数据注入到指定对象，返回解析结果
-func bindValidate(r *http.Request, obj interface{}, vr *ValidateResult) {
-
-	// 2. tag 规则校验
-	if err := Validate.Struct(obj); err != nil {
-		vr.Err = ValidateErrorWrap(err, ErrBodyValidate)
-		return
-	}
-
-	// 3. 自定义校验
-	if v, hasValidateMethod := obj.(RequestValidate); hasValidateMethod {
-		if ok, errMsg := v.Validate(r); !ok {
-			vr.Err = ValidateErrorWrap(errors.New(errMsg), ErrRequestValidate)
-			return
-		}
-	}
-
-	return
-}
-
-func parse(r *http.Request, vr *ValidateResult) {
-
-	var err error
-
-	// 查看请求 mime 类型
-	vr.MediaType, err = ParseMediaType(r)
-	if err != nil {
-		vr.Err = ValidateErrorWrap(err, ErrMediaTypeParse)
-		return
-	}
-
-	switch r.Method {
-	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete /*delete 请求可以有主体 https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE */ : // 考虑做成动态的
-		switch vr.MediaType {
-		case MIMEPOSTForm:
-			if err := r.ParseForm(); err != nil {
-				vr.Err = ValidateErrorWrap(err, ErrBodyParse)
-			}
-		case MIMEMultipartPOSTForm:
-			if err := r.ParseMultipartForm(defaultMemory); err != nil {
-				vr.Err = ValidateErrorWrap(err, ErrBodyParse)
-			}
-		case MIMEJSON:
-			body := DumpRequestPure(r)
-			if len(body) != 0 {
-				vr.BodyBytes = body
-			} else if StrictJSONBodyCheck() { // 是否严格校验 json body
-				vr.Err = ValidateErrorWrap(errors.New("body empty"), ErrBodyRead)
-			}
-		default:
-			vr.Err = ValidateErrorWrap(errors.New("mediaType not support"), ErrMediaType)
-		}
-	default:
-		// GET DELETE HEAD OPTION
-	}
-
-	// catch error
-	if vr.Err != nil {
-		return
-	}
-
-	if r.PostForm != nil {
-		vr.BodyValues = r.PostForm
-	} else {
-		vr.BodyValues = url.Values{}
-	}
-
-	if r.Form != nil {
-		vr.QueryValues = r.Form
-	} else {
-		vr.QueryValues = url.Values{}
-	}
-
-	// parse url query
-	parseQuery(r, vr)
-}
-
-func decodeTo(r *http.Request, obj interface{}, vr *ValidateResult) {
-	if len(vr.BodyBytes) > 0 {
-		if err := json.Unmarshal(vr.BodyBytes, obj); err != nil {
-			vr.Err = ValidateErrorWrap(err, ErrBodyUnmarshal)
-		}
-	}
-
-	if err := DecodeForm(obj, vr.QueryValues); err != nil {
-		vr.Err = ValidateErrorWrap(err, ErrDecode)
-		return
-	}
-}
-
-// 解析 URL ,并将 URL 参数解析到指定对象
-func parseQuery(r *http.Request, vr *ValidateResult) {
-	parseQuery, err := ParseQuery(r)
-
-	if err != nil {
-		vr.Err = ValidateErrorWrap(err, ErrParseQuery)
-		return
-	}
-
-	if parseQuery != nil && len(parseQuery) > 0 {
-		vr.QueryValues = NewQueryWith(vr.QueryValues).With(parseQuery).v
-	}
-}
-
-const (
-	sep       = ";"
-	quo       = "'"
-	failedMsg = " failed on tag "
-)
-
-// ValidatorStandErrMsg 构建请求错误提示信息
-func ValidatorStandErrMsg(err error) string {
-
-	vErr, ok := err.(validator.ValidationErrors)
-	if !ok {
-		return err.Error()
-	}
-
-	buildRv := ""
-	for i, e := range vErr {
-		if i != 0 {
-			buildRv += sep
-		}
-		buildRv += e.Namespace() + failedMsg + quo + e.Tag() + quo
-	}
-
-	return buildRv
-}

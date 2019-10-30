@@ -1,110 +1,164 @@
 package mplus
 
 import (
-	"net"
-	"net/http"
-	"strings"
+	"github.com/tangzixiang/mplus/header"
 )
 
 // 请求头常量
 const (
-	RequestIDHeader           = "X-Request-Id" // 当前请求的 request-id
-	ContentTypeHeader         = "Content-Type"
-	ForwardedForHeader        = "X-Forwarded-For"
-	RealIPHeader              = "X-Real-Ip"
-	AppEngineRemoteAddrHeader = "X-Appengine-Remote-Addr"
+	HeaderAccept                          = header.Accept
+	HeaderAcceptCharset                   = header.AcceptCharset
+	HeaderAccessControlAllowCredentials   = header.AccessControlAllowCredentials
+	HeaderAccessControlAllowHeader        = header.AccessControlAllowHeaders
+	HeaderAccessControlAllowMethods       = header.AccessControlAllowMethods
+	HeaderAccessControlAllowOrigin        = header.AccessControlAllowOrigin
+	HeaderAccessControlExposeHeader       = header.AccessControlExposeHeaders
+	HeaderAccessControlMaxAge             = header.AccessControlMaxAge
+	HeaderAccessControlRequestHeader      = header.AccessControlRequestHeaders
+	HeaderAccessControlRequestMethod      = header.AccessControlRequestMethod
+	HeaderAcceptEncoding                  = header.AcceptEncoding
+	HeaderAcceptLanguage                  = header.AcceptLanguage
+	HeaderAcceptRanges                    = header.AcceptRanges
+	HeaderAllow                           = header.Allow
+	HeaderAge                             = header.Age
+	HeaderAltSvc                          = header.AltSvc
+	HeaderAuthorization                   = header.Authorization
+	HeaderCacheControl                    = header.CacheControl
+	HeaderCc                              = header.Cc
+	HeaderClearSiteData                   = header.ClearSiteData
+	HeaderConnection                      = header.Connection
+	HeaderContentType                     = header.ContentType
+	HeaderContentLocation                 = header.ContentLocation
+	HeaderContentRange                    = header.ContentRange
+	HeaderContentID                       = header.ContentID
+	HeaderContentDisposition              = header.ContentDisposition
+	HeaderContentLanguage                 = header.ContentLanguage
+	HeaderContentLength                   = header.ContentLength
+	HeaderContentEncoding                 = header.ContentEncoding
+	HeaderContentTransferEncoding         = header.ContentTransferEncoding
+	HeaderCookie                          = header.Cookie
+	HeaderCrossOriginResourcePolicy       = header.CrossOriginResourcePolicy
+	HeaderContentSecurityPolicyReportOnly = header.ContentSecurityPolicyReportOnly
+	HeaderContentSecurityPolicy           = header.ContentSecurityPolicy
+	HeaderDNS                             = header.DNS
+	HeaderDate                            = header.Date
+	HeaderDNT                             = header.DNT
+	HeaderDigest                          = header.Digest
+	HeaderDkimSignature                   = header.DkimSignature
+	HeaderEtag                            = header.Etag
+	HeaderEarlyData                       = header.EarlyData
+	HeaderExpect                          = header.Expect
+	HeaderExpectCT                        = header.ExpectCT
+	HeaderExpires                         = header.Expires
+	HeaderFeaturePolicy                   = header.FeaturePolicy
+	HeaderFrom                            = header.From
+	HeaderForwarded                       = header.Forwarded
+	HeaderHost                            = header.Host
+	HeaderIfUnmodifiedSince               = header.IfUnmodifiedSince
+	HeaderIfModifiedSince                 = header.IfModifiedSince
+	HeaderIfMatch                         = header.IfMatch
+	HeaderIfRange                         = header.IfRange
+	HeaderIfNoneMatch                     = header.IfNoneMatch
+	HeaderInReplyTo                       = header.InReplyTo
+	HeaderKeepAlive                       = header.KeepAlive
+	HeaderLargeAllocation                 = header.LargeAllocation
+	HeaderLastModified                    = header.LastModified
+	HeaderLocation                        = header.Location
+	HeaderMessageID                       = header.MessageID
+	HeaderMimeVersion                     = header.MimeVersion
+	HeaderOrigin                          = header.Origin
+	HeaderPublicKeyPinsReportOnly         = header.PublicKeyPinsReportOnly
+	HeaderPublicKeyPins                   = header.PublicKeyPins
+	HeaderProxyAuthorization              = header.ProxyAuthorization
+	HeaderProxyAuthenticate               = header.ProxyAuthenticate
+	HeaderPragma                          = header.Pragma
+	HeaderRange                           = header.Range
+	HeaderReferer                         = header.Referer
+	HeaderRetryAfter                      = header.RetryAfter
+	HeaderReferrerPolicy                  = header.ReferrerPolicy
+	HeaderReceived                        = header.Received
+	HeaderReturnPath                      = header.ReturnPath
+	HeaderSaveData                        = header.SaveData
+	HeaderServer                          = header.Server
+	HeaderSecWebSocketAccept              = header.SecWebSocketAccept
+	HeaderServerTiming                    = header.ServerTiming
+	HeaderSetCookie                       = header.SetCookie
+	HeaderSubject                         = header.Subject
+	HeaderStrictTransportSecurity         = header.StrictTransportSecurity
+	HeaderSourceMap                       = header.SourceMap
+	HeaderTE                              = header.TE
+	HeaderTimingAllowOrigin               = header.TimingAllowOrigin
+	HeaderTk                              = header.Tk
+	HeaderTrailer                         = header.Trailer
+	HeaderTransferEncoding                = header.TransferEncoding
+	HeaderTo                              = header.To
+	HeaderUserAgent                       = header.UserAgent
+	HeaderUpgradeInsecureRequests         = header.UpgradeInsecureRequests
+	HeaderVia                             = header.Via
+	HeaderVary                            = header.Vary
+	HeaderWWWAuthenticate                 = header.WWWAuthenticate
+	HeaderWantDigest                      = header.WantDigest
+	HeaderWarning                         = header.Warning
+	HeaderForwardedHost                   = header.ForwardedHost
+	HeaderForwardedProto                  = header.ForwardedProto
+	HeaderFrameOptions                    = header.FrameOptions
+	HeaderXSSProtection                   = header.XSSProtection
+	HeaderContentTypeOptions              = header.ContentTypeOptions
+	HeaderDNSPrefetchControl              = header.DNSPrefetchControl
+	HeaderPoweredBy                       = header.PoweredBy
+	HeaderImforwards                      = header.Imforwards
+	HeaderRequestID                       = header.RequestID
+	HeaderForwardedFor                    = header.ForwardedFor
+	HeaderRealIP                          = header.RealIP
+	HeaderAppEngineRemoteAddr             = header.AppEngineRemoteAddr
+)
+
+const (
+	ContentTypeJSON              = header.ContentTypeJSON
+	ContentTypeForm              = header.ContentTypeForm
+	ContentTypeText              = header.ContentTypeText
+	ContentTypeXML               = header.ContentTypeXML
+	ContentTypeStream            = header.ContentTypeStream
+	ContentTypeHTML              = header.ContentTypeHTML
+	ContentTypeXML2              = header.ContentTypeXML2
+	ContentTypePlain             = header.ContentTypePlain
+	ContentTypeMultipartPOSTForm = header.ContentTypeMultipartPOSTForm
+	ContentTypePROTOBUF          = header.ContentTypePROTOBUF
+	ContentTypeMSGPACK           = header.ContentTypeMSGPACK
+	ContentTypeMSGPACK2          = header.ContentTypeMSGPACK2
 )
 
 // 请求头分割字符
-const HeaderSplitSep = " "
-
-// GetHeader 获取指定请求头
-func GetHeader(r *http.Request, header string) string {
-	return r.Header.Get(header)
-}
-
-// SplitHeader 分割指定请求头内容
-func SplitHeader(r *http.Request, header string) []string {
-	return strings.Split(GetHeader(r, header), HeaderSplitSep)
-}
-
-// GetHeaderRequestID 获取 RequestID
-func GetHeaderRequestID(r *http.Request) string {
-	return GetHeader(r, RequestIDHeader)
-}
-
-// SetRequestHeader 添加指定请求头
-func SetRequestHeader(r *http.Request, key, value string) *http.Request {
-	r.Header.Set(key, value)
-	return r
-}
-
-// SetRequestHeaders 添加指定请求头
-func SetRequestHeaders(r *http.Request, headers map[string]string) *http.Request {
-	for key, value := range headers {
-		r.Header.Set(key, value)
-	}
-	return r
-}
-
-// GetResponseHeader 获取指定请求头
-func GetResponseHeader(w http.ResponseWriter, header string) string {
-	return w.Header().Get(header)
-}
-
-// SetResponseHeader 将指定请求头添加到响应中
-func SetResponseHeader(w http.ResponseWriter, key, value string) http.ResponseWriter {
-	w.Header().Set(key, value)
-	return w
-}
-
-// SetResponseHeaders 将指定请求头添加到响应中
-func SetResponseHeaders(w http.ResponseWriter, headers map[string]string) http.ResponseWriter {
-	for key, value := range headers {
-		w.Header().Set(key, value)
-	}
-	return w
-}
-
-// SetRequestHeaderRequestID 在 request 中添加 RequestID
-func SetRequestHeaderRequestID(r *http.Request, id string) *http.Request {
-	SetRequestHeader(r, RequestIDHeader, id)
-	return r
-}
-
-// GetClientIP 获取客户端 IP 地址
-// ClientIP implements a best effort algorithm to return the real client IP, it parses
-// X-Real-IP and X-Forwarded-For in order to work properly with reverse-proxies such us: nginx or haproxy.
-// Use X-Forwarded-For before X-Real-Ip as nginx uses X-Real-Ip with the proxy's IP.
-func GetClientIP(r *http.Request) string {
-	clientIP := GetHeader(r, ForwardedForHeader)
-	clientIP = strings.TrimSpace(strings.Split(clientIP, ",")[0])
-
-	if clientIP == "" {
-		clientIP = strings.TrimSpace(GetHeader(r, RealIPHeader))
-	}
-
-	if clientIP != "" {
-		return clientIP
-	}
-
-	// #726 #755 If enabled, it will thrust some headers starting with
-	// 'X-AppEngine...' for better integration with that PaaS.
-	if addr := GetHeader(r, AppEngineRemoteAddrHeader); addr != "" {
-		return addr
-	}
-
-	if ip, _, err := net.SplitHostPort(strings.TrimSpace(r.RemoteAddr)); err == nil {
-		return ip
-	}
-
-	return ""
-}
-
 const (
-	ContentTypeJSON   = "application/json"
-	ContentTypeForm   = "application/x-www-form-urlencoded"
-	ContentTypeText   = "text/plain"
-	ContentTypeXML    = "application/xml"
-	ContentTypeStream = "application/octet-stream"
+	SplitSepBlankSpace = header.SplitSepBlankSpace
+	SplitSepComma      = header.SplitSepComma
+	SplitSepSemicolon  = header.SplitSepSemicolon
+)
+
+var (
+	GetHeader                  = header.GetHeader
+	GetHeaderValues            = header.GetHeaderValues
+	SplitHeader                = header.SplitHeader
+	GetHeaderRequestID         = header.GetHeaderRequestID
+	SetRequestHeader           = header.SetRequestHeader
+	SetRequestHeaderIf         = header.SetRequestHeaderIf
+	SetRequestHeaders          = header.SetRequestHeaders
+	SetRequestHeadersIf        = header.SetRequestHeadersIf
+	AddRequestHeader           = header.AddRequestHeader
+	AddRequestHeaderIf         = header.AddRequestHeaderIf
+	AddRequestHeaders          = header.AddRequestHeaders
+	AddRequestHeadersIf        = header.AddRequestHeadersIf
+	GetResponseHeader          = header.GetResponseHeader
+	GetResponseHeaderValues    = header.GetResponseHeaderValues
+	SetResponseHeader          = header.SetResponseHeader
+	SetResponseHeaderIf        = header.SetResponseHeaderIf
+	SetResponseHeaders         = header.SetResponseHeaders
+	SetResponseHeadersIf       = header.SetResponseHeadersIf
+	AddResponseHeader          = header.AddResponseHeader
+	AddResponseHeaderIf        = header.AddResponseHeaderIf
+	AddResponseHeaders         = header.AddResponseHeaders
+	AddResponseHeadersIf       = header.AddResponseHeadersIf
+	SetRequestHeaderRequestID  = header.SetRequestHeaderRequestID
+	SetResponseHeaderRequestID = header.SetResponseHeaderRequestID
+	GetClientIP                = header.GetClientIP
 )
