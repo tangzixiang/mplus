@@ -780,14 +780,6 @@ func (p *PP) CallbackByCode(errorCode int, respData interface{}) *PP {
 			m.Do(p.w, p.r, mByCode, respData)
 			return p
 		}
-
-		switch mByCode.Status() {
-		case http.StatusOK:
-			p.JSONOK(respData)
-		case http.StatusBadRequest:
-			p.BadRequest()
-
-		}
 	}
 
 	return p
