@@ -12,6 +12,8 @@ type mRote struct {
 	before, after []http.Handler
 }
 
+type Route = mRote
+
 // MRote 获取一个可复用型中间件路由实例
 func MRote() *mRote {
 	return new(mRote).UseHandlerMiddleware(middleware.PreHandler).Use(middleware.Pre) // 初始化上下文
@@ -69,6 +71,7 @@ func (mr *mRote) HandlerFunc(handler http.HandlerFunc) http.HandlerFunc {
 
 // Use 使用 MiddlewareHandlerFunc 系列中间件
 func (mr *mRote) Use(ms ...middleware.MiddlewareHandlerFunc) *mRote {
+
 	for _, m := range ms {
 		mr.middlewares = append(mr.middlewares, m)
 	}
@@ -123,7 +126,30 @@ func (mr *mRote) AfterHandler(handler ...http.Handler) *mRote {
 	return mr
 }
 
-// Bind 将请求数据绑定至 validateData，validateData 只能是对象指针或则 ValidateFunc
+// Bind 将请求数据绑定至 validateData，validateData 只能是对象指针或则 ValidateFunc, 返回的为当前路由的拷贝
 func (mr *mRote) Bind(validateData interface{}) *mRote {
-	return mr.BeforeHandler(middleware.Bind(validateData))
+	return mr.Copy().BeforeHandler(middleware.Bind(validateData))
+}
+
+// Copy 获取一份当前配置的拷贝
+func (mr *mRote) Copy() *mRote {
+
+	// 1. 包裹所有前置请求处理器宝及当前 handler
+	// 2. 包裹当前 handler 及所有后置请求处理器
+	// 3. 将当前 handler 放入 middleware 层层封装
+
+	_mr := &mRote{}
+	for _, b := range mr.before {
+		_mr.before = append(_mr.before, b)
+	}
+
+	for _, a := range mr.after {
+		_mr.after = append(_mr.after, a)
+	}
+
+	for _, m := range mr.middlewares {
+		_mr.middlewares = append(_mr.middlewares, m)
+	}
+
+	return _mr
 }
