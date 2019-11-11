@@ -19,6 +19,11 @@ func MRote() *mRote {
 	return new(mRote).UseHandlerMiddleware(middleware.PreHandler).Use(middleware.Pre) // 初始化上下文
 }
 
+// EmptyMRote 获取一个非内置初始化上下文的可复用型中间件路由实例，可以用于配合其他框架使用，需要在外部对上下文进行初始化
+func EmptyMRote() *mRote {
+	return new(mRote) // 初始化上下文
+}
+
 // Handler 获取通过前置或后置请求处理器及中间件进行封装后的 handler
 func (mr *mRote) Handler(handler http.Handler) http.Handler {
 
@@ -133,10 +138,6 @@ func (mr *mRote) Bind(validateData interface{}) *mRote {
 
 // Copy 获取一份当前配置的拷贝
 func (mr *mRote) Copy() *mRote {
-
-	// 1. 包裹所有前置请求处理器宝及当前 handler
-	// 2. 包裹当前 handler 及所有后置请求处理器
-	// 3. 将当前 handler 放入 middleware 层层封装
 
 	_mr := &mRote{}
 	for _, b := range mr.before {
