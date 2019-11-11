@@ -6,4 +6,7 @@ import (
 
 type Route = route.Route
 
-var MRote = route.MRote
+var (
+	MRote      = route.MRote
+	EmptyMRote = route.EmptyMRote
+)
