@@ -43,7 +43,7 @@ func (p *PP) RequestID() string {
 	return header.GetHeaderRequestID(p.r)
 }
 
-// VO 获取请求对象
+// VO 获取请求对象，需要同时使用 mplus 的 bind 机制
 func (p *PP) VO() interface{} {
 	return context.GetContextValue(p.r.Context(), context.ReqData)
 }
@@ -973,7 +973,7 @@ func (p *PP) GetStatus() int {
 	return mhttp.GetHTTPRespStatus(p.w)
 }
 
-// CopyReq 拷贝一个请求，body 不会被拷贝，因为 body 是一个数据流
+// CopyReq 拷贝一个请求
 func (p *PP) CopyReq() *http.Request {
 	return mhttp.CopyRequest(p.r)
 }
@@ -1009,4 +1009,29 @@ func (p *PP) ReqBodyMap() (map[string]interface{}, error) {
 // ReqBodyMap 读取 p.r 的 body 内容并保持 p.r.Body 可持续使用,body 内容会被序列化至 unmarshaler
 func (p *PP) ReqBodyToUnmarshaler(unmarshaler json.Unmarshaler) error {
 	return unmarshaler.UnmarshalJSON(mhttp.DumpRequestPure(p.r))
+}
+
+// SetCookie 添加 cookie 信息
+func (p *PP) SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool) *PP {
+	http.SetCookie(p.Resp(), &http.Cookie{
+		Name: name, Value: url.QueryEscape(value),
+		MaxAge: maxAge, Path: path, Domain: domain,
+		Secure: secure, HttpOnly: httpOnly,
+	})
+	return p
+}
+
+// Cookie 获取指定 name 的 cookie
+func (p *PP) Cookie(name string) (string, error) {
+	c, err := p.Req().Cookie(name)
+	if err != nil {
+		return "", err
+	}
+
+	return url.QueryUnescape(c.Value)
+}
+
+// Cookies 获取所有 cookie
+func (p *PP) Cookies() []*http.Cookie {
+	return p.Req().Cookies()
 }
