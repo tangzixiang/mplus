@@ -154,6 +154,21 @@ func parse(r *http.Request, vr *ValidateResult) {
 	default:
 		// GET HEAD OPTION
 		// parse url query
+
+		if err := r.ParseForm(); err != nil {
+			vr.Err = errs.ValidateErrorWrap(err, errs.ErrBodyParse)
+		}
+
+		// catch error
+		if vr.Err != nil {
+			return
+		}
+
+		if r.Form != nil {
+			vr.QueryValues = r.Form
+		} else {
+			vr.QueryValues = url.Values{}
+		}
 		parseQuery(r, vr)
 	}
 }
