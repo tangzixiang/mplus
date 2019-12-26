@@ -1,0 +1,9 @@
+language: go
+
+go:
+- 1.x
+- master
+
+branches:
+  except:
+  - master

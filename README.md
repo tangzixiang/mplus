@@ -4,6 +4,8 @@
 
 # mplus 🚍
 
+[![Build Status](https://travis-ci.org/tangzixiang/mplus.svg?branch=master)](https://travis-ci.org/tangzixiang/mplus) [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=plastic)](https://github.com/RichardLitt/standard-readme) [![GitHub](https://img.shields.io/github/license/tangzixiang/mplus)](https://github.com/tangzixiang/mplus/blob/master/LICENSE) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/tangzixiang/mplus) [![](https://badgen.net/github/branches/tangzixiang/mplus)](https://github.com/tangzixiang/mplus/branches) [![](https://badgen.net/github/stars/tangzixiang/mplus)](https://github.com/tangzixiang/mplus/stargazers) [![](https://badgen.net/github/commits/tangzixiang/mplus)](https://github.com/tangzixiang/mplus/commits/master) [![](https://img.shields.io/badge/godoc-reference-lightgrey)](https://godoc.org/github.com/tangzixiang/mplus)
+
 **mplus** 是一个轻量级的非侵入式 http 请求处理辅助框架。具有以下特色：
 
 - 能够灵活的将大量 middleware 组合成一个 http-Handler 直接使用。
@@ -900,24 +902,6 @@ $ curl --request POST \
 
 < HTTP/1.1 200 OK 
 ```
-
-
-
-### 文件上传及 form 数据读取
-
-
-
-
-
-### 配合 [mux](https://github.com/gorilla/mux) 使用
-
-由于 **mplus** 是一个轻量级的非侵入式 http 请求处理辅助框架，而非路由框架，所以 mplus 可以很好的和其他路由框架进行搭配使用,譬如 🦍  [mux](https://github.com/gorilla/mux) 。
-
-```go
-
-```
-
-
 
 ## 贡献
 
