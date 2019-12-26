@@ -23,4 +23,4 @@ fmt :
 	gofmt -l -e -d -w .
 
 test : 
-	go test
+	go test -v ./...

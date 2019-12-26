@@ -54,7 +54,7 @@ func main() {
 		// Allow: GET, POST, HEAD
 		// see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405
 		mplus.PlusPlus(w, r).WriteRespHeader(
-			mplus.HeaderAllow, strings.Join([]string{http.MethodGet, http.MethodPost, http.MethodPut}, mplus.SplitSepComma)).NotAllowed()
+			mplus.HeaderAllow, strings.Join([]string{http.MethodGet, http.MethodPost, http.MethodPut}, mplus.SplitSepComma)).MethodNotAllowed()
 	}))
 
 	//  response's status code is 408
