@@ -24,6 +24,12 @@ github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b/go.mod h1:dA0hQrY
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
+github.com/tangzixiang/appender v0.0.0-20200521092740-f1756f5fba98 h1:xO9kwrtxgA2/drgp5zvgo/y9xHSqMZr8h/8Cs0lHu3w=
+github.com/tangzixiang/appender v0.0.0-20200521092740-f1756f5fba98/go.mod h1:RKLwxY4eABabrLUX74mM+UUlOaaOV+fvtbYv1zVWbi0=
+github.com/tangzixiang/appender v0.0.0-20200521093650-834dcfbab971 h1:ovO6C6gbBRD/cEkrzbaN/BVJjgrl+W2r+1dle87Bcuw=
+github.com/tangzixiang/appender v0.0.0-20200521093650-834dcfbab971/go.mod h1:RKLwxY4eABabrLUX74mM+UUlOaaOV+fvtbYv1zVWbi0=
+github.com/tangzixiang/appender v0.0.1 h1:wintwIywFb/6IQvpb7PeZPFR5vXBT6jx5H+gLO/nw70=
+github.com/tangzixiang/appender v0.0.1/go.mod h1:RKLwxY4eABabrLUX74mM+UUlOaaOV+fvtbYv1zVWbi0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/go-playground/assert.v1 v1.2.1 h1:xoYuJVE7KT85PYWrN730RguIQO0ePzVRfFMXadIrXTM=
