@@ -274,8 +274,9 @@ func TestBindFailedButGotBodyData(t *testing.T) {
 	SetRequestHeader(request, HeaderContentType, ContentTypeJSON)
 
 	response := httptest.NewRecorder()
+	responseWrite := NewResponseWrite(response)
 
-	Bind((*V)(nil)).ServeHTTP(response, request)
+	Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 	resp := response.Result()
 
@@ -295,6 +296,7 @@ func TestBindFailedWithRegisterErrHandler(t *testing.T) {
 	SetRequestHeader(request, HeaderContentType, ContentTypeJSON)
 
 	response := httptest.NewRecorder()
+	responseWrite := NewResponseWrite(response)
 
 	// 使用通道模拟锁的机制防止与其他测试冲突
 	BeforeTest(true)
@@ -304,7 +306,7 @@ func TestBindFailedWithRegisterErrHandler(t *testing.T) {
 		PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
 	})
 
-	Bind((*V)(nil)).ServeHTTP(response, request)
+	Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 	resp := response.Result()
 
@@ -359,10 +361,11 @@ func TestBindErrMediaType(t *testing.T) {
 				request := httptest.NewRequest(method, "http://localhost", nil)
 				request = request.WithContext(NewContext(request.Context()))
 				response := httptest.NewRecorder()
+				responseWrite := NewResponseWrite(response)
 
 				SetRequestHeader(request, HeaderContentType, mediaType)
 
-				Bind((*V)(nil)).ServeHTTP(response, request)
+				Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 				resp := response.Result()
 
@@ -387,6 +390,7 @@ func TestBindErrMediaTypeParse(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, "application/")
 
 		response := httptest.NewRecorder()
+		responseWrite := NewResponseWrite(response)
 
 		// 使用通道模拟锁的机制防止与其他测试冲突
 		BeforeTest(true)
@@ -396,7 +400,7 @@ func TestBindErrMediaTypeParse(t *testing.T) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, http.StatusUnsupportedMediaType)
 		})
 
-		Bind((*V)(nil)).ServeHTTP(response, request)
+		Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 		resp := response.Result()
 
@@ -411,6 +415,7 @@ func TestBindErrMediaTypeParse(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, "application/")
 
 		response := httptest.NewRecorder()
+		responseWrite := NewResponseWrite(response)
 
 		// 使用通道模拟锁的机制防止与其他测试冲突
 		BeforeTest(true)
@@ -420,7 +425,7 @@ func TestBindErrMediaTypeParse(t *testing.T) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, http.StatusUnsupportedMediaType)
 		})
 
-		Bind((*V)(nil)).ServeHTTP(response, request)
+		Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 		resp := response.Result()
 
@@ -445,12 +450,12 @@ func TestBindErrBodyRead(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, ContentTypeJSON)
 
 		response := httptest.NewRecorder()
-
+		responseWrite := NewResponseWrite(response)
 		// 使用通道模拟锁的机制防止与其他测试冲突
 		BeforeTest(true)
 		defer AfterTest(true)
 
-		Bind((*V)(nil)).ServeHTTP(response, request)
+		Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 		resp := response.Result()
 
@@ -464,6 +469,7 @@ func TestBindErrBodyRead(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, ContentTypeJSON)
 
 		response := httptest.NewRecorder()
+		responseWrite := NewResponseWrite(response)
 
 		// 使用通道模拟锁的机制防止与其他测试冲突
 		BeforeTest(true)
@@ -473,7 +479,7 @@ func TestBindErrBodyRead(t *testing.T) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
 		})
 
-		Bind((*V)(nil)).ServeHTTP(response, request)
+		Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 		resp := response.Result()
 
@@ -500,8 +506,9 @@ func TestBindErrBodyUnmarshal(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, ContentTypeJSON)
 
 		response := httptest.NewRecorder()
+		responseWrite := NewResponseWrite(response)
 
-		Bind((*V)(nil)).ServeHTTP(response, request)
+		Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 		resp := response.Result()
 
@@ -515,6 +522,7 @@ func TestBindErrBodyUnmarshal(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, ContentTypeJSON)
 
 		response := httptest.NewRecorder()
+		responseWrite := NewResponseWrite(response)
 
 		// 使用通道模拟锁的机制防止与其他测试冲突
 		BeforeTest(true)
@@ -524,7 +532,7 @@ func TestBindErrBodyUnmarshal(t *testing.T) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
 		})
 
-		Bind((*V)(nil)).ServeHTTP(response, request)
+		Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 		resp := response.Result()
 
@@ -550,8 +558,9 @@ func TestBindErrBodyParse(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, ContentTypeForm)
 
 		response := httptest.NewRecorder()
+		responseWrite := NewResponseWrite(response)
 
-		Bind((*V)(nil)).ServeHTTP(response, request)
+		Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 		resp := response.Result()
 
@@ -564,6 +573,7 @@ func TestBindErrBodyParse(t *testing.T) {
 		SetRequestHeader(request, HeaderContentType, ContentTypeMultipartPOSTForm)
 
 		response := httptest.NewRecorder()
+		responseWrite := NewResponseWrite(response)
 
 		// 使用通道模拟锁的机制防止与其他测试冲突
 		BeforeTest(true)
@@ -573,7 +583,7 @@ func TestBindErrBodyParse(t *testing.T) {
 			PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
 		})
 
-		Bind((*V)(nil)).ServeHTTP(response, request)
+		Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 		resp := response.Result()
 
@@ -602,6 +612,7 @@ func TestBindErrRequestValidate(t *testing.T) {
 	SetRequestHeader(request, HeaderContentType, ContentTypeJSON)
 
 	response := httptest.NewRecorder()
+	responseWrite := NewResponseWrite(response)
 
 	// 使用通道模拟锁的机制防止与其他测试冲突
 	BeforeTest(true)
@@ -616,7 +627,7 @@ func TestBindErrRequestValidate(t *testing.T) {
 		PlusPlus(w, r).JSON(map[string]interface{}{"err_message": err.Error()}, 400)
 	})
 
-	Bind((*V)(nil)).ServeHTTP(response, request)
+	Bind((*V)(nil)).ServeHTTP(responseWrite, request)
 
 	resp := response.Result()
 
