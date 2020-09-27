@@ -1,7 +1,9 @@
 package validate
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -93,6 +95,7 @@ func parse(r *http.Request, vr *ValidateResult) {
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete /*delete 请求可以有主体 https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE */ : // 考虑做成动态的
 		switch vr.MediaType {
 		case mime.MIMEPOSTForm:
+			body := mhttp.DumpRequestPure(r)
 			if err := r.ParseForm(); err != nil { // 支持 POST PUT PATCH 含有主体
 				vr.Err = errs.ValidateErrorWrap(err, errs.ErrBodyParse)
 			}
@@ -114,7 +117,9 @@ func parse(r *http.Request, vr *ValidateResult) {
 				vr.QueryValues = url.Values{}
 			}
 
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 		case mime.MIMEMultipartPOSTForm:
+			body := mhttp.DumpRequestPure(r)
 			if err := r.ParseMultipartForm(mhttp.DefaultMemorySize()); err != nil {
 				vr.Err = errs.ValidateErrorWrap(err, errs.ErrBodyParse)
 			}
@@ -136,6 +141,7 @@ func parse(r *http.Request, vr *ValidateResult) {
 				vr.QueryValues = url.Values{}
 			}
 
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 		case mime.MIMEJSON:
 			body := mhttp.DumpRequestPure(r)
 			if len(body) != 0 {
@@ -174,7 +180,6 @@ func parse(r *http.Request, vr *ValidateResult) {
 }
 
 func decodeTo(r *http.Request, obj interface{}, vr *ValidateResult) {
-
 	switch r.Method {
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete /*delete 请求可以有主体 https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/DELETE */ : // 考虑做成动态的
 		switch vr.MediaType {
@@ -246,7 +251,6 @@ const (
 
 // ValidatorStandErrMsg 构建请求错误提示信息
 func ValidatorStandErrMsg(err error) string {
-
 	vErr, ok := err.(validator.ValidationErrors)
 	if !ok {
 		return err.Error()

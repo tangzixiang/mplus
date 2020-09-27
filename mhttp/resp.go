@@ -74,7 +74,7 @@ func SetHTTPRespStatus(w http.ResponseWriter, statusCode int, coverSupper ...boo
 
 	rw, ok := w.(ResponseWriter)
 
-	if !ok {// 不支持非 ResponseWriter
+	if !ok { // 不支持非 ResponseWriter
 		return w
 	}
 
